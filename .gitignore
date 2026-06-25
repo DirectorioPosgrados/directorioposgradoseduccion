@@ -51,3 +51,7 @@ pnpm-debug.log*
 *.pem
 cypress/videos/
 cypress/screenshots/
+
+# ── General ──
+*.md
+*.txt
