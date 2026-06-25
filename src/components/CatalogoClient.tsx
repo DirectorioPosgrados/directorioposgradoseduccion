@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/layout/Hero";
 import { Card } from "@/components/ui/Card";
 import { normalizar } from "@/lib/utils";
+import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -180,6 +181,35 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
     const currentVisible = visibleCount > filtered.length ? filtered.length : visibleCount;
     const totalFiltered = filtered.length;
 
+    // ── Detectar país activo (filtro o búsqueda) y obtener su análisis ──
+    const paisActivo = useMemo(() => {
+        // Prioridad 1: filtro de país seleccionado
+        if (activeFilter !== "Todos") return activeFilter;
+
+        // Prioridad 2: si el texto del buscador coincide con un país del repositorio
+        if (searchTerm.trim()) {
+            const analisis = obtenerAnalisisPorPais(searchTerm.trim());
+            if (analisis) {
+                // Devolver el nombre del país tal como está en el repositorio (con tildes)
+                for (const key of Object.keys(
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    { México: 1, Honduras: 1, "El Salvador": 1, Nicaragua: 1, "Costa Rica": 1, Panamá: 1, "República Dominicana": 1, Cuba: 1, "Puerto Rico": 1, Venezuela: 1, Colombia: 1, Ecuador: 1, Perú: 1, Bolivia: 1, Chile: 1, Uruguay: 1, Paraguay: 1, Argentina: 1 }
+                )) {
+                    if (key.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === searchTerm.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()) {
+                        return key;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }, [activeFilter, searchTerm]);
+
+    const analisisPais = useMemo(
+        () => (paisActivo ? obtenerAnalisisPorPais(paisActivo) : null),
+        [paisActivo]
+    );
+
     return (
         <>
             <Header />
@@ -281,6 +311,18 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                         {totalFiltered !== 1 ? "s" : ""} encontrado
                         {totalFiltered !== 1 ? "s" : ""}
                     </p>
+                )}
+
+                {/* ── Banner contextual del país activo ── */}
+                {analisisPais && paisActivo && (
+                    <div className="bg-black/70 border border-yellow/30 rounded-xl p-5 mb-6">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-yellow text-black mb-3">
+                            Panorama en {paisActivo}
+                        </span>
+                        <p className="text-white/75 text-sm leading-relaxed">
+                            {analisisPais.introduccion}
+                        </p>
+                    </div>
                 )}
 
                 {/* ── Error State ── */}
