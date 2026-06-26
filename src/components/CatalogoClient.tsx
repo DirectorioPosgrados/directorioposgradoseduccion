@@ -10,6 +10,7 @@ import { Hero } from "@/components/layout/Hero";
 import { Card } from "@/components/ui/Card";
 import { normalizar } from "@/lib/utils";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
+import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -37,6 +38,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
     const [priceRange, setPriceRange] = useState(0);                 // Índice en PRICE_RANGES (nuevo)
     const [searchTerm, setSearchTerm] = useState("");                // Búsqueda por texto / precio
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);     // Paginación
+    const [orientadorAbierto, setOrientadorAbierto] = useState(false); // Modal del orientador IA
 
     // ── Valores únicos dinámicos deducidos de la data real ──
     const paisesUnicos = useMemo(() => {
@@ -216,6 +218,17 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
             <Hero onSearch={handleSearch} />
             <StatsBarDynamic programas={inicialProgramas} />
 
+            {/* ── Botón Orientador Vocacional IA ── */}
+            <div className="max-w-[1100px] mx-auto px-10 mt-8 max-sm:px-5">
+                <button
+                    onClick={() => setOrientadorAbierto(true)}
+                    className="w-full font-sans text-sm font-bold tracking-[0.5px] uppercase bg-gradient-to-r from-black to-gray-bg border-2 border-yellow text-yellow rounded-xl px-8 py-4 cursor-pointer transition-all hover:bg-yellow hover:text-black flex items-center justify-center gap-2"
+                >
+                    <span className="text-lg">🧠</span>
+                    Orientador Vocacional de IA — Descubre tu posgrado ideal en 3 preguntas
+                </button>
+            </div>
+
             <main className="max-w-[1100px] mx-auto px-10 py-[52px_40px_80px] max-sm:px-5 max-sm:py-9">
                 {/* ── Filtros superiores ── */}
                 <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
@@ -371,6 +384,12 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                     </>
                 )}
             </main>
+
+            {/* ── Modal del Orientador Vocacional IA ── */}
+            <OrientadorModal
+                abierto={orientadorAbierto}
+                onCerrar={() => setOrientadorAbierto(false)}
+            />
 
             {/* ── Footer ── */}
             <footer className="bg-black text-center px-10 py-7 text-[13px]">
