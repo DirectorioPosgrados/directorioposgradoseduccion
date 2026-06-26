@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { fetchProgramas } from "@/lib/services/airtable";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { Header } from "@/components/layout/Header";
+import { TesistaActions } from "@/components/ui/TesistaActions";
 import type { Programa } from "@/types";
 
 // ── ISR: revalidación cada 1 hora ──
@@ -158,6 +159,9 @@ export default async function ProgramaDetallePage({ params }: Props) {
                                 <p className="text-lg font-semibold text-white">{programa.universidad}</p>
                                 <p className="text-sm text-white/50 mt-1">{programa.pais}</p>
                             </div>
+
+                            {/* ── Checkbox de tesis + Contactar Asesor ── */}
+                            <TesistaActions programa={programa} variant="detalle" />
 
                             {/* Botón de acción externa */}
                             {programa.url && (
