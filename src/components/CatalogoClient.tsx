@@ -7,9 +7,11 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/layout/Hero";
+import { PresentacionInvestigacion } from "@/components/layout/PresentacionInvestigacion";
 import { Card } from "@/components/ui/Card";
 import { normalizar } from "@/lib/utils";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
+import { INSIGHTS_POR_PAIS } from "@/lib/constants/insightsMexico";
 import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import type { Programa } from "@/types";
 
@@ -39,6 +41,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
     const [searchTerm, setSearchTerm] = useState("");                // Búsqueda por texto / precio
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);     // Paginación
     const [orientadorAbierto, setOrientadorAbierto] = useState(false); // Modal del orientador IA
+    const [nivelPaisActivo, setNivelPaisActivo] = useState<"maestria" | "doctorado" | null>(null); // Tab de nivel dentro del panorama
 
     // ── Valores únicos dinámicos deducidos de la data real ──
     const paisesUnicos = useMemo(() => {
@@ -141,6 +144,14 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
             );
         }
 
+        // --- Filtro por nivel de país activo (tabs del panorama) ---
+        if (nivelPaisActivo) {
+            const nivelBuscado = nivelPaisActivo === "maestria" ? "maestria" : "doctorado";
+            result = result.filter((p) =>
+                p.nivel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(nivelBuscado)
+            );
+        }
+
         return result;
     }, [
         inicialProgramas,
@@ -150,6 +161,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
         modalidadFilter,
         universidadFilter,
         priceRange,
+        nivelPaisActivo,
     ]);
 
     // ── Slice de paginación ──
@@ -216,6 +228,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
         <>
             <Header />
             <Hero onSearch={handleSearch} />
+            <PresentacionInvestigacion />
             <StatsBarDynamic programas={inicialProgramas} />
 
             {/* ── Botón Orientador Vocacional IA ── */}
@@ -326,15 +339,58 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                     </p>
                 )}
 
-                {/* ── Banner contextual del país activo ── */}
+                {/* ── Banner contextual del país activo con tabs de nivel ── */}
                 {analisisPais && paisActivo && (
                     <div className="bg-black/70 border border-yellow/30 rounded-xl p-5 mb-6">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-yellow text-black mb-3">
                             Panorama en {paisActivo}
                         </span>
-                        <p className="text-white/75 text-sm leading-relaxed">
+                        <p className="text-white/75 text-sm leading-relaxed mb-4">
                             {analisisPais.introduccion}
                         </p>
+
+                        {/* ── Pestañas de nivel (Maestría / Doctorado) — selección exclusiva, default maestría ── */}
+                        <div className="flex gap-2 flex-wrap mb-4">
+                            <button
+                                onClick={() => {
+                                    setNivelPaisActivo("maestria");
+                                    setVisibleCount(PAGE_SIZE);
+                                }}
+                                className={`font-sans text-[12px] font-medium px-4 py-1.5 rounded-full cursor-pointer transition-all border-2 ${nivelPaisActivo === "maestria"
+                                    ? "bg-yellow border-yellow text-black"
+                                    : "bg-transparent border-white/20 text-white/70 hover:border-yellow/50"
+                                    }`}
+                            >
+                                🎓 Oferta Maestrías
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setNivelPaisActivo("doctorado");
+                                    setVisibleCount(PAGE_SIZE);
+                                }}
+                                className={`font-sans text-[12px] font-medium px-4 py-1.5 rounded-full cursor-pointer transition-all border-2 ${nivelPaisActivo === "doctorado"
+                                    ? "bg-yellow border-yellow text-black"
+                                    : "bg-transparent border-white/20 text-white/70 hover:border-yellow/50"
+                                    }`}
+                            >
+                                🏛️ Oferta Doctorados
+                            </button>
+                        </div>
+
+                        {/* ── Insights de Oro (solo para países con datos) ── */}
+                        {INSIGHTS_POR_PAIS[paisActivo] && nivelPaisActivo && (
+                            <div className="bg-black/40 border border-yellow/20 rounded-lg p-4 space-y-3">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-yellow">
+                                    💡 Insights de Oro — {nivelPaisActivo === "maestria" ? "Maestrías" : "Doctorados"} {paisActivo}
+                                </h4>
+                                {INSIGHTS_POR_PAIS[paisActivo][nivelPaisActivo].map((insight, i) => (
+                                    <div key={i} className="text-white/75 text-xs leading-relaxed">
+                                        <strong className="text-white font-semibold">{insight.titulo}:</strong>{" "}
+                                        {insight.contenido}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 

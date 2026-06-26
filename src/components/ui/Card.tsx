@@ -103,17 +103,17 @@ export function Card({ programa, index }: CardProps) {
         </div>
       </div>
 
-      {/* ── Sección inferior: Componente reutilizable TesistaActions + Ver Programa ── */}
+      {/* ── Sección inferior: Ver Programa + TesistaActions ── */}
       <div className="w-full bg-gray-100 p-4 mt-auto border-t border-gray-200 flex flex-col gap-2">
-        <TesistaActions programa={programa} variant="card" />
-
         {/* Botón "Ver Programa" — navega a la ruta dinámica /programas/[slug] */}
         <Link
           href={`/programas/${programa.slug}`}
-          className="font-sans text-sm font-semibold no-underline rounded-[4px] px-3.5 py-2 flex items-center justify-center gap-1.5 cursor-pointer w-full transition-all text-black bg-yellow border-2 border-yellow hover:bg-yellow-dark hover:border-yellow-dark"
+          className="font-sans text-sm font-semibold no-underline rounded-full px-3.5 py-2 flex items-center justify-center gap-1.5 cursor-pointer w-full transition-all text-black bg-yellow border-2 border-yellow hover:bg-yellow-dark hover:border-yellow-dark"
         >
           Ver Programa
         </Link>
+
+        <TesistaActions programa={programa} variant="card" />
       </div>
     </article>
   );

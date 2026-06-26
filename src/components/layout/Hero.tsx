@@ -16,19 +16,19 @@ export function Hero({ onSearch }: HeroProps) {
       <div className="max-w-[1100px] mx-auto">
         {/* Badge superior */}
         <span className="inline-block bg-yellow text-black text-[11px] font-bold tracking-[2px] uppercase px-3 py-1 rounded-sm mb-5">
-          ✦ El directorio más completo
+          ✦ COMUNIDAD TESISTA DE LATINOAMÉRICA
         </span>
 
         {/* Título principal */}
         <h1 className="font-sans font-bold text-[clamp(32px,5vw,56px)] leading-[1.05] tracking-[-1px] max-w-[680px] mb-4">
-          Encuentra tu <em className="not-italic text-yellow">posgrado ideal</em>{" "}
-          en el mundo
+          Directorio de{" "}
+          <em className="not-italic text-yellow">Posgrados en Educación</em>{" "}
+          2026
         </h1>
 
         {/* Subtítulo descriptivo */}
         <p className="text-base text-white/65 max-w-[500px] mb-9 leading-relaxed">
-          Compara programas, costos de matrícula y calidad de vida en más de 30
-          países. Decisiones inteligentes, futuro brillante.
+          Compara programas, costos, duración, y requisitos de grado de 18 países.
         </p>
 
         {/* Input de búsqueda — conectado vía onChange a CatalogoClient.handleSearch */}
