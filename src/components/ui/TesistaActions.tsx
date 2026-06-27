@@ -1,5 +1,5 @@
 // Archivo: src/components/ui/TesistaActions.tsx
-// Componente reutilizable: Checkbox de redacción de tesis + Botón WhatsApp "Contactar Asesor".
+// Componente reutilizable: Checkbox de redacción de tesis + Botón WhatsApp "Cotizar tesis con CTL".
 // Usado tanto en las Cards del catálogo como en las páginas de detalle /programas/[slug].
 // Lógica de cálculo unificada en COP (pesos colombianos).
 
@@ -102,7 +102,7 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
                         ? `Hola, me interesa el programa: ${programa.nombre} incluyendo redacción de tesis. Total estimado: ${fmtCOP(totalCop!)}`
                         : `Hola, me interesa el programa: ${programa.nombre}`;
                     const text = encodeURIComponent(mensaje);
-                    window.open(`https://wa.me/?text=${text}`, "_blank");
+                    window.open(`https://wa.me/573005347644?text=${text}`, "_blank");
                 }}
             >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
