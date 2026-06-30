@@ -20,13 +20,13 @@ const SLIDES: Slide[] = [
     logo: "/images/logo-vertical-blanco.png",
     mensaje: "¿Necesitas ayuda urgente con tu proyecto de grado? Chatea directamente con un asesor académico.",
     ctaTexto: "COTIZAR POR WHATSAPP →",
-    link: "https://wa.me/573005347644?text=Hola,%20quiero%20cotizar%20mi%20tesis%20con%20CTL.",
+    link: "https://wa.me/573005347644?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20el%20servicio%20de%20redacci%C3%B3n",
   },
   {
     logo: "/images/logo-vertical-blanco.png",
     mensaje: "Evita retrasos en tu aumento de sueldo. Asegura tu aprobación y cotiza tu tesis hoy mismo.",
     ctaTexto: "HABLAR CON EXPERTO →",
-    link: "https://wa.me/573005347644?text=Hola,%20vengo%20del%20directorio%20y%20quiero%20asesor%C3%ADa.",
+    link: "https://wa.me/573005347644?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20el%20servicio%20de%20redacci%C3%B3n",
   },
 ];
 

@@ -103,18 +103,39 @@ export async function fetchProgramas(): Promise<Programa[]> {
       const params = new URLSearchParams();
       if (offset) params.set("offset", offset);
 
-      const res = await fetch(`${baseUrl}?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const MAX_RETRIES = 2;
+      let res: Response;
 
-      if (!res.ok) {
-        throw new Error(`Airtable respondió con ${res.status}: ${res.statusText}`);
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        res = await fetch(`${baseUrl}?${params.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        // 429: rate limit — esperar 30s y reintentar la misma pagina
+        if (res.status === 429) {
+          if (attempt < MAX_RETRIES - 1) {
+            console.warn(
+              `[Airtable] 429 Too Many Requests — esperando 30s (intento ${attempt + 1}/${MAX_RETRIES})...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 30000));
+            continue;
+          }
+          throw new Error(
+            `Airtable respondió con ${res.status}: ${res.statusText} (agotados ${MAX_RETRIES} intentos)`
+          );
+        }
+
+        if (!res.ok) {
+          throw new Error(`Airtable respondió con ${res.status}: ${res.statusText}`);
+        }
+
+        break; // exito — salir del bucle de retry
       }
 
-      const data: AirtableResponse = await res.json();
+      const data: AirtableResponse = await res!.json();
 
       const mapped = data.records.map(mapRecord);
       allRecords.push(...mapped);

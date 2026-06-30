@@ -98,9 +98,7 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
                 data-programa-pais={programa.pais}
                 data-accion="contacto_whatsapp"
                 onClick={() => {
-                    const mensaje = incluirTesis
-                        ? `Hola, me interesa el programa: ${programa.nombre} incluyendo redacción de tesis. Total estimado: ${fmtCOP(totalCop!)}`
-                        : `Hola, me interesa el programa: ${programa.nombre}`;
+                    const mensaje = `Hola, estoy interesado en redacción para ${programa.nivel} en ${programa.nombre} de la universidad ${programa.universidad} país ${programa.pais}`;
                     const text = encodeURIComponent(mensaje);
                     window.open(`https://wa.me/573005347644?text=${text}`, "_blank");
                 }}

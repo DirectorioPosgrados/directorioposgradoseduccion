@@ -2,7 +2,8 @@ import { fetchProgramas } from "@/lib/services/airtable";
 import CatalogoClient from "@/components/CatalogoClient";
 import type { Programa } from "@/types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+export const maxDuration = 180;
 
 export default async function HomePage() {
     let programas: Programa[] = [];

@@ -12,6 +12,7 @@ import type { Programa } from "@/types";
 
 // ── ISR: revalidación cada 1 hora ──
 export const revalidate = 3600;
+export const maxDuration = 180;
 
 /**
  * Generación estática de rutas (SSG).
