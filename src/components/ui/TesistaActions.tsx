@@ -1,96 +1,76 @@
 // Archivo: src/components/ui/TesistaActions.tsx
 // Componente reutilizable: Checkbox de redacción de tesis + Botón WhatsApp "Cotizar tesis con CTL".
 // Usado tanto en las Cards del catálogo como en las páginas de detalle /programas/[slug].
-// Lógica de cálculo unificada en COP (pesos colombianos).
+// Lógica de cálculo unificada en USD (dólares estadounidenses).
 
 "use client";
 
 import { useState } from "react";
 import type { Programa } from "@/types";
+import { PRECIO_MAESTRIA_COP, PRECIO_DOCTORADO_COP, TRM_COP } from "@/config/tarifasTesis";
 
-// ── Constantes Financieras ──
-const TASA_CAMBIO_USD = 3500;
-const PRECIO_MAESTRIA_COP = 3450000;
-const PRECIO_DOCTORADO_COP = 6000000;
-
-/** Formatea un valor numérico como COP sin decimales */
-function fmtCOP(valor: number): string {
-    return valor.toLocaleString("es-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0,
-    });
+/** Formatea un valor numérico como USD */
+function fmtUSD(valor: number): string {
+  return valor.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 }
 
 interface TesistaActionsProps {
     programa: Programa;
-    /** Variante visual: "card" usa estilos compactos, "detalle" usa estilos más amplios */
     variant?: "card" | "detalle";
 }
 
 export function TesistaActions({ programa, variant = "card" }: TesistaActionsProps) {
     const [incluirTesis, setIncluirTesis] = useState(false);
-
-    // ── Lógica de cálculo unificada en COP ──
     const nivelNormalizado = programa.nivel.toLowerCase();
-    const precioTesisCop =
-        nivelNormalizado.includes("maestría") || nivelNormalizado.includes("magíster")
-            ? PRECIO_MAESTRIA_COP
+
+    const precioTesisUSD =
+        nivelNormalizado.includes("maestría") ||
+        nivelNormalizado.includes("magíster") ||
+        nivelNormalizado.includes("maestria") ||
+        nivelNormalizado.includes("magister")
+            ? PRECIO_MAESTRIA_COP / TRM_COP
             : nivelNormalizado.includes("doctorado")
-                ? PRECIO_DOCTORADO_COP
-                : 0;
+            ? PRECIO_DOCTORADO_COP / TRM_COP
+            : 0;
 
-    const matriculaEnCop = programa.matricula * TASA_CAMBIO_USD;
-    const totalCop = incluirTesis ? matriculaEnCop + precioTesisCop : null;
-
+    const totalUSD = incluirTesis ? programa.matricula + precioTesisUSD : null;
     const esDetalle = variant === "detalle";
 
     return (
         <div className="flex flex-col gap-2 w-full">
-            {/* ── Opcional de redacción de tesis ── */}
-            {precioTesisCop > 0 && (
+            {precioTesisUSD > 0 && (
                 <div className={`flex flex-col gap-1.5 ${esDetalle ? "bg-white/5 border border-white/10 rounded-xl p-5" : ""}`}>
-                    {/* Checkbox estilizado */}
                     <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={incluirTesis}
-                            onChange={(e) => setIncluirTesis(e.target.checked)}
-                            className="peer sr-only"
-                        />
+                        <input type="checkbox" checked={incluirTesis} onChange={(e) => setIncluirTesis(e.target.checked)} className="peer sr-only" />
                         <span className={`w-4 h-4 border-2 rounded-[3px] flex items-center justify-center transition-colors peer-checked:bg-yellow peer-checked:border-yellow peer-focus:outline-none ${esDetalle ? "border-white/40" : "border-gray-400"}`}>
                             {incluirTesis && (
                                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                    <path
-                                        d="M1 4l2.5 2.5L9 1"
-                                        stroke="#000000"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
+                                    <path d="M1 4l2.5 2.5L9 1" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             )}
                         </span>
                         <span className={`text-xs font-medium ${esDetalle ? "text-white/80" : "text-black/80"}`}>
-                            Incluir redacción de tesis
+                            Incluir redacción de tesis ({fmtUSD(precioTesisUSD)})
                         </span>
                     </label>
 
-                    {/* Desglose cuando el checkbox está activo */}
-                    {incluirTesis && totalCop !== null && (
+                    {incluirTesis && totalUSD !== null && (
                         <div className={`rounded-md px-3 py-2 border ${esDetalle ? "bg-yellow/10 border-yellow/30" : "bg-black/5 border-black/10"}`}>
                             <p className={`text-[11px] font-bold uppercase tracking-wider ${esDetalle ? "text-white/50" : "text-gray-text"}`}>
-                                Matrícula: {fmtCOP(matriculaEnCop)} · Tesis: {fmtCOP(precioTesisCop)}
+                                Posgrado: {fmtUSD(programa.matricula)} · Tesis: {fmtUSD(precioTesisUSD)}
                             </p>
                             <p className={`text-sm font-bold mt-0.5 ${esDetalle ? "text-yellow" : "text-black"}`}>
-                                Total Estimado: {fmtCOP(totalCop)}
+                                Total Estimado: {fmtUSD(totalUSD)}
                             </p>
                         </div>
                     )}
                 </div>
             )}
-
-            {/* ── Botón WhatsApp "Cotizar tesis con CTL" ── */}
             <button
                 className={`font-sans text-sm font-semibold no-underline rounded-full flex items-center justify-center gap-1.5 cursor-pointer w-full transition-all text-white bg-[#25D366] border-2 border-[#25D366] hover:bg-[#1ebe5d] hover:border-[#1ebe5d] ${esDetalle ? "px-8 py-4" : "px-3.5 py-2"}`}
                 data-programa-id={programa.id}
@@ -98,7 +78,11 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
                 data-programa-pais={programa.pais}
                 data-accion="contacto_whatsapp"
                 onClick={() => {
-                    const mensaje = `Hola, estoy interesado en redacción para ${programa.nivel} en ${programa.nombre} de la universidad ${programa.universidad} país ${programa.pais}`;
+                    const mensaje = `Hola, vengo del Directorio de Posgrados. Me interesa ` +
+                        `el servicio de redacción de tesis para el programa: ` +
+                        `${programa.nivel} en ${programa.nombre} — ` +
+                        `${programa.universidad}, ${programa.pais}. ` +
+                        `Total estimado por el servicio de tesis: ${fmtUSD(precioTesisUSD)}`;
                     const text = encodeURIComponent(mensaje);
                     window.open(`https://wa.me/573005347644?text=${text}`, "_blank");
                 }}
