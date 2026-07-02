@@ -24,7 +24,7 @@ export interface RespuestaOrientador {
 }
 
 /** System prompt comercial unificado (usado por todos los proveedores y el fallback) */
-const SYSTEM_PROMPT = `Eres un orientador vocacional premium de Comunidad Tesista en Latinoamérica. Tu misión es analizar el perfil del usuario y los 5 programas adjuntos para persuadirlo de dar el siguiente paso en su crecimiento profesional.
+const SYSTEM_PROMPT = `Eres un orientador vocacional premium de Comunidad Tesista en Latinoamérica. Tu misión es analizar el perfil del usuario y los 5 programas que el sistema ha identificado como los más relevantes para tu perfil para persuadirlo de dar el siguiente paso en su crecimiento profesional.
 
 Redacta un análisis profesional, cálido y motivador en español que siga de forma estricta estas pautas:
 
@@ -162,6 +162,7 @@ async function callDeepSeek(apiKey: string, systemPrompt: string, userPrompt: st
 
 /** Filtra y ordena los programas según el perfil del usuario */
 function filtrarRecomendaciones(programas: Programa[], perfil: PerfilOrientador): Programa[] {
+    // ── Paso 1: Filtros base ──
     let candidatos = [...programas];
 
     // Filtrar por modalidad (si no es "Todas")
@@ -173,7 +174,7 @@ function filtrarRecomendaciones(programas: Programa[], perfil: PerfilOrientador)
         });
     }
 
-    // Filtrar por país (si no es vacío)
+    // Filtrar por país (si no es vacío), con relajación si quedan menos de 3
     if (perfil.pais) {
         const paisNorm = perfil.pais.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const filtradosPais = candidatos.filter((p) => {
@@ -201,20 +202,61 @@ function filtrarRecomendaciones(programas: Programa[], perfil: PerfilOrientador)
         }
     }
 
-    // Deduplicación por universidad para evitar sesgo
+    // ── Paso 2: Separar por requisito de tesis ──
+    const conTesis = candidatos.filter(p =>
+        p.requisito_grado?.toLowerCase().includes("tesis")
+    );
+    const sinTesis = candidatos.filter(p =>
+        !p.requisito_grado?.toLowerCase().includes("tesis")
+    );
+
+    const pool = conTesis.length >= 5
+        ? conTesis
+        : [...conTesis, ...sinTesis];
+
+    // ── Paso 3: Ordenamiento según presupuesto ──
+    const tienepresupuesto = perfil.presupuesto !== null && perfil.presupuesto > 0;
+
+    if (tienepresupuesto) {
+        // Con presupuesto: más barato primero
+        pool.sort((a, b) => a.matricula - b.matricula);
+    } else {
+        // Sin presupuesto: programas con costo real primero (descendente), $0 al final
+        pool.sort((a, b) => {
+            const aEs0 = !a.matricula || a.matricula === 0;
+            const bEs0 = !b.matricula || b.matricula === 0;
+            if (aEs0 && !bEs0) return 1;
+            if (!aEs0 && bEs0) return -1;
+            return b.matricula - a.matricula;
+        });
+    }
+
+    // ── Paso 4 y 5: Deduplicación por universidad (max 1) y por país (max 2) ──
     const universidadesVistas = new Set<string>();
+    const paisesVistos = new Map<string, number>();
     const diversificados: Programa[] = [];
-    for (const p of candidatos.sort((a, b) => a.matricula - b.matricula)) {
+
+    for (const p of pool) {
         const uniKey = p.universidad.toLowerCase().trim();
-        if (!universidadesVistas.has(uniKey)) {
-            universidadesVistas.add(uniKey);
-            diversificados.push(p);
-        }
+
+        // Verificar universidad: max 1 por universidad
+        if (universidadesVistas.has(uniKey)) continue;
+
+        // Verificar país: max 2 por país
+        const conteo = paisesVistos.get(p.pais) || 0;
+        if (conteo >= 2) continue;
+
+        // Pasa ambas verificaciones
+        universidadesVistas.add(uniKey);
+        paisesVistos.set(p.pais, conteo + 1);
+        diversificados.push(p);
+
         if (diversificados.length === 5) break;
     }
+
     if (diversificados.length >= 3) return diversificados;
-    // Si no hay suficiente diversidad, retornar los 5 originales
-    return candidatos.slice(0, 5);
+    // Si no hay suficiente diversidad, retornar los 5 originales del pool
+    return pool.slice(0, 5);
 }
 
 /** Construye el user prompt con el perfil y los programas recomendados */
