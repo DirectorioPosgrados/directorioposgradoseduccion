@@ -13,6 +13,7 @@ import { normalizar } from "@/lib/utils";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { INSIGHTS_POR_PAIS } from "@/lib/constants/insightsMexico";
 import { OrientadorModal } from "@/components/ui/OrientadorModal";
+import LeadModal from "@/components/ui/LeadModal";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -226,6 +227,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
 
     return (
         <>
+            <LeadModal />
             <Header />
             <Hero onSearch={handleSearch} />
             <PresentacionInvestigacion />
