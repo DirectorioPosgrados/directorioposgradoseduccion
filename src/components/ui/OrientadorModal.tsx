@@ -98,7 +98,7 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
         const programasTexto = resultado
             ? resultado.recomendaciones.map((r) => r.nombre).join(", ")
             : "";
-        const texto = `Hola, vengo del Orientador Vocacional de CTL.` +
+        const texto = `Hola, me envía el Orientador Vocacional del Directorio de Posgrados.` +
             (programasTexto
                 ? ` Me recomendaron: ${programasTexto}.`
                 : "") +
