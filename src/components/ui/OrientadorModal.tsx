@@ -21,7 +21,8 @@ interface Props {
     onCerrar: () => void;
 }
 
-const AREAS = ["Educación", "Tecnología", "Ciencias Sociales", "Salud", "Ingeniería", "Otra"];
+const AREAS = ["Educación", "Pedagogía", "Gestión Educativa",
+    "TIC en Educación", "Ciencias Sociales"];
 const OBJETIVOS = ["Ascenso salarial", "Investigación", "Docencia universitaria", "Cambio de carrera"];
 const MODALIDADES = ["Virtual", "Presencial", "Híbrida", "Todas"];
 const RANGOS_PRECIO = [
@@ -94,10 +95,38 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
     };
 
     const handleWhatsApp = () => {
-        const texto = resultado
-            ? `Hola, vengo del Orientador Vocacional de IA. Me recomendaron: ${resultado.recomendaciones.map((r) => r.nombre).join(", ")}`
-            : "Hola, vengo del Orientador Vocacional de IA.";
+        const programasTexto = resultado
+            ? resultado.recomendaciones.map((r) => r.nombre).join(", ")
+            : "";
+        const texto = `Hola, vengo del Orientador Vocacional de CTL.` +
+            (programasTexto
+                ? ` Me recomendaron: ${programasTexto}.`
+                : "") +
+            ` Me interesa el servicio de redacción de tesis.`;
         window.open(`https://wa.me/573005347644?text=${encodeURIComponent(texto)}`, "_blank");
+    };
+
+    // Renderizar mensaje con soporte Markdown básico (**negrita**)
+    const renderMensaje = () => {
+        if (!resultado) return null;
+        const lineas = resultado.mensaje.split("\n");
+        return lineas.map((linea, i) => {
+            const partes = linea.split(/(\*\*[^*]+\*\*)/g);
+            return (
+                <p key={i} className="mb-2 last:mb-0">
+                    {partes.map((fragmento, j) => {
+                        if (fragmento.startsWith("**") && fragmento.endsWith("**")) {
+                            return (
+                                <strong key={j} className="text-white font-semibold">
+                                    {fragmento.slice(2, -2)}
+                                </strong>
+                            );
+                        }
+                        return <span key={j}>{fragmento}</span>;
+                    })}
+                </p>
+            );
+        });
     };
 
     // Renderizar el párrafo de tesis con "contactando con uno de nuestros asesores" como link a WhatsApp
@@ -204,15 +233,15 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                             {/* Pregunta 4: País */}
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-yellow mb-2">
-                                    4. ¿Tienes preferencia por algún país?
+                                    4. ¿Desde qué país nos visitas?
                                 </label>
                                 <select
                                     value={pais}
                                     onChange={(e) => setPais(e.target.value)}
-                                    className="w-full font-sans text-[13px] font-medium px-3 py-2 bg-black/40 border border-white/20 rounded-lg text-white outline-none focus:border-yellow transition-colors appearance-none cursor-pointer"
+                                    className="w-full bg-black/40 border border-white/20 rounded-full px-4 py-2 text-white/70 text-sm outline-none focus:border-yellow/50 transition-colors"
                                 >
                                     {PAISES.map((p) => (
-                                        <option key={p} value={p} className="bg-gray-bg text-white">
+                                        <option key={p} value={p}>
                                             {p}
                                         </option>
                                     ))}
@@ -222,13 +251,16 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                             {/* Pregunta 5: Presupuesto */}
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-yellow mb-2">
-                                    5. ¿Cuál es tu presupuesto máximo? (USD)
+                                    5. ¿Cuál es tu presupuesto máximo en USD?
                                 </label>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-2 mb-3">
                                     {RANGOS_PRECIO.map((r, i) => (
                                         <button
                                             key={i}
-                                            onClick={() => { setPresupuestoRango(i); setPresupuestoManual(""); }}
+                                            onClick={() => {
+                                                setPresupuestoRango(i);
+                                                if (r.value !== -1) setPresupuestoManual("");
+                                            }}
                                             className={`font-sans text-[13px] font-medium px-3.5 py-1.5 border-2 rounded-full cursor-pointer transition-all ${presupuestoRango === i
                                                 ? "bg-yellow border-yellow text-black"
                                                 : "bg-black/40 border-white/20 text-white/70 hover:border-yellow/50"
@@ -241,49 +273,45 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                                 {esManual && (
                                     <input
                                         type="number"
-                                        min="1"
-                                        step="100"
-                                        placeholder="Ej: 2500"
+                                        placeholder="Ingresa tu presupuesto en USD"
                                         value={presupuestoManual}
                                         onChange={(e) => setPresupuestoManual(e.target.value)}
-                                        className="mt-3 w-full font-sans text-sm px-3 py-2 bg-black/40 border border-white/20 rounded-lg text-white outline-none focus:border-yellow transition-colors placeholder:text-white/30"
+                                        className="w-full bg-black/40 border border-white/20 rounded-full px-4 py-2 text-white/70 text-sm outline-none focus:border-yellow/50 transition-colors"
                                     />
                                 )}
                             </div>
 
-                            {/* Botón enviar */}
+                            {/* Botón Enviar */}
                             <button
                                 onClick={handleEnviar}
                                 disabled={!puedeEnviar}
-                                className={`w-full font-sans text-sm font-bold tracking-[0.5px] uppercase rounded-md px-8 py-3.5 cursor-pointer transition-colors border-2 ${puedeEnviar
-                                    ? "bg-yellow text-black border-yellow hover:bg-yellow-dark"
-                                    : "bg-white/5 text-white/20 border-white/10 cursor-not-allowed"
-                                    }`}
+                                className="w-full font-sans text-sm font-bold tracking-[0.5px] uppercase bg-yellow text-black border-2 border-yellow rounded-full px-6 py-3 cursor-pointer transition-all hover:bg-yellow/90 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
-                                Analizar mi perfil con IA
+                                Obtener recomendación personalizada 🚀
                             </button>
                         </div>
                     )}
 
                     {/* Estado: Cargando */}
                     {cargando && (
-                        <div className="flex flex-col items-center gap-4 py-10">
-                            <div className="w-10 h-10 border-2 border-yellow border-t-transparent rounded-full animate-spin" />
-                            <p className="text-white/70 text-sm">Analizando tu perfil con IA...</p>
+                        <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                            <div className="w-10 h-10 border-4 border-yellow/30 border-t-yellow rounded-full animate-spin" />
+                            <p className="text-white/60 text-sm">
+                                Analizando tu perfil con IA...
+                            </p>
                         </div>
                     )}
 
                     {/* Estado: Error */}
-                    {error && (
-                        <div className="space-y-4">
-                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                                <p className="text-red-400 text-sm">{error}</p>
-                            </div>
+                    {error && !cargando && (
+                        <div className="text-center py-10 space-y-4">
+                            <div className="text-3xl">⚠️</div>
+                            <p className="text-red-400 text-sm">{error}</p>
                             <button
-                                onClick={() => { setError(null); setCargando(false); }}
-                                className="w-full font-sans text-sm font-bold tracking-[0.5px] uppercase bg-yellow text-black border-2 border-yellow rounded-md px-6 py-3 cursor-pointer hover:bg-yellow-dark"
+                                onClick={handleCerrar}
+                                className="font-sans text-sm font-medium text-white/50 hover:text-white transition-colors cursor-pointer bg-transparent border-none underline"
                             >
-                                Intentar de nuevo
+                                Cerrar
                             </button>
                         </div>
                     )}
@@ -292,8 +320,8 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                     {resultado && (
                         <div className="space-y-5">
                             <div className="bg-black/40 border border-yellow/30 rounded-xl p-5">
-                                <div className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
-                                    {resultado.mensaje}
+                                <div className="text-white/80 text-sm leading-relaxed space-y-1">
+                                    {renderMensaje()}
                                 </div>
                             </div>
 

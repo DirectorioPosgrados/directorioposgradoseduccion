@@ -35,7 +35,7 @@ Redacta un análisis profesional, cálido y motivador en español que siga de fo
 
 2. Manejo de Precios y Beneficios:
 - Jamás escribas textualmente montos de "$0 USD" o precios vacíos. Si un programa viene con valor 0 en la base de datos, tradúcelo comercialmente como un "Programa con opción de Beca Completa", "Convenio Pro Bono" o "Financiamiento Especial con la institución".
-- Cierre comercial sutil: Concluye tu texto recordando que el verdadero reto de estos posgrados es la investigación de grado, y que Comunidad Tesista cuenta con planes especiales para asegurar la redacción de su tesis por un costo preferencial ($3.450.000 COP para Maestrías y $6.000.000 COP para Doctorados) para que puedan estudiar sin preocupaciones.
+- Cierre comercial sutil: Concluye tu texto recordando que el verdadero reto de estos posgrados es la investigación de grado, y que Comunidad Tesista cuenta con planes especiales para asegurar la redacción de su tesis por un costo preferencial ($862 USD para Maestrías y $1,500 USD para Doctorados) para que puedan estudiar sin preocupaciones.
 
 3. Formato y Extensión:
 - Usa negritas de Markdown (**texto**) de forma selectiva para resaltar conceptos clave en cada párrafo (como las universidades, palabras como 'beca completa' o 'convenio pro bono', y los precios de las tesis). Esto romperá la densidad visual y facilitará el escaneo rápido sin perder profundidad.
@@ -78,7 +78,7 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
     const deepseekKey = process.env.DEEPSEEK_API_KEY;
     if (deepseekKey) {
         try {
-            console.log("[Orientador IA] Failover → DeepSeek...");
+            console.log("[Orientador IA] Intentando DeepSeek...");
             const mensaje = await callDeepSeek(deepseekKey, SYSTEM_PROMPT, userPrompt);
             if (mensaje) return { mensaje, recomendaciones };
         } catch (err) {
@@ -86,8 +86,8 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
         }
     }
 
-    // ── 4. Caída segura al fallback ──
-    console.log("[Orientador IA] Sin proveedores disponibles → fallback manual");
+    // ── 4. Fallback final: respuesta estructurada sin dependencias externas ──
+    console.log("[Orientador IA] Usando respuesta de fallback manual");
     return {
         mensaje: generarRespuestaFallback(perfil),
         recomendaciones,
@@ -98,18 +98,23 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
 //  PROVEEDORES DE IA
 // ═══════════════════════════════════════════════
 
-/** Intenta generar respuesta con Google Gemini */
+/** Llama a Google Gemini 2.0 Flash */
 async function callGemini(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string | null> {
-    const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
-
     const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+                contents: [
+                    {
+                        parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+                    },
+                ],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1024,
+                },
             }),
         }
     );
@@ -120,11 +125,10 @@ async function callGemini(apiKey: string, systemPrompt: string, userPrompt: stri
     }
 
     const data = await res.json();
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    return texto || null;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 }
 
-/** Intenta generar respuesta con DeepSeek (API compatible con OpenAI) */
+/** Llama a DeepSeek (API compatible con OpenAI) */
 async function callDeepSeek(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string | null> {
     const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
@@ -197,7 +201,20 @@ function filtrarRecomendaciones(programas: Programa[], perfil: PerfilOrientador)
         }
     }
 
-    return candidatos.sort((a, b) => a.matricula - b.matricula).slice(0, 5);
+    // Deduplicación por universidad para evitar sesgo
+    const universidadesVistas = new Set<string>();
+    const diversificados: Programa[] = [];
+    for (const p of candidatos.sort((a, b) => a.matricula - b.matricula)) {
+        const uniKey = p.universidad.toLowerCase().trim();
+        if (!universidadesVistas.has(uniKey)) {
+            universidadesVistas.add(uniKey);
+            diversificados.push(p);
+        }
+        if (diversificados.length === 5) break;
+    }
+    if (diversificados.length >= 3) return diversificados;
+    // Si no hay suficiente diversidad, retornar los 5 originales
+    return candidatos.slice(0, 5);
 }
 
 /** Construye el user prompt con el perfil y los programas recomendados */
@@ -238,5 +255,5 @@ function generarRespuestaFallback(perfil: PerfilOrientador): string {
 
 Las opciones seleccionadas a continuación destacan por su alta adaptabilidad y prestigio institucional. Es importante resaltar que algunas de estas alternativas cuentan con convenios Pro Bono o beneficios de Beca Completa, lo que representa una oportunidad financiera inmejorable para alcanzar tus metas académicas sin comprometer tu presupuesto actual.
 
-Recuerda que el verdadero desafío de estos posgrados de alto nivel radica en la etapa de investigación de grado. Para que puedas enfocarte plenamente en tu aprendizaje, Comunidad Tesista cuenta con planes de acompañamiento preferenciales en pesos colombianos para la redacción de tu tesis ($3,450,000 COP para Maestrías y $6,000,000 COP para Doctorados), garantizando tu titulación con éxito y permitiéndote avanzar sin preocupaciones académicas.`;
+Recuerda que el verdadero desafío de estos posgrados de alto nivel radica en la etapa de investigación de grado. Para que puedas enfocarte plenamente en tu aprendizaje, Comunidad Tesista cuenta con planes de acompañamiento preferenciales en pesos colombianos para la redacción de tu tesis ($862 USD para Maestrías y $1,500 USD para Doctorados), garantizando tu titulación con éxito y permitiéndote avanzar sin preocupaciones académicas.`;
 }
