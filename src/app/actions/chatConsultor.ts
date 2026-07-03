@@ -166,6 +166,10 @@ Requisito de grado: ${programa.requisito_grado || 'No especificado'}.`;
 
     prompt += `
 
+Nunca asumas que el país donde el usuario ejerce profesionalmente es el mismo país del programa académico, a menos que el usuario lo haya confirmado explícitamente en la conversación. El país del programa (${programa.pais}) es solo el país de la universidad, no el del usuario.
+
+Si el usuario aún no ha indicado en qué país ejerce profesionalmente y en cualquier turno pregunta algo relacionado con escalafón docente, requisitos de convalidación o beneficios salariales, antes de responder con datos específicos acláraselo brevemente y pregunta: "Para darte una respuesta exacta necesito saber en qué país ejerces profesionalmente — los escalafones varían bastante según el país." No respondas con cifras de escalafón hasta tener esa respuesta.
+
 Cuando el usuario pregunte por salarios o escalafón, usa ÚNICAMENTE estos rangos de referencia y siempre incluye el disclaimer:
 
 Colombia (Decreto 1278): Maestría → incremento estimado 25-40% sobre grado base. Entidad: mineducacion.gov.co
@@ -189,6 +193,13 @@ En el turno ${turnoActual} (turno final), después de tu respuesta normal incluy
 [WA_MSG]Hola, me envía el Consultor Experto del Directorio de Posgrados. Consulté sobre ${programa.nombre} en ${programa.universidad}, ${programa.pais}. [RESUMEN_1_FRASE]. Me interesa el servicio de redacción de tesis.[/WA_MSG]
 
 Reemplaza [RESUMEN_1_FRASE] con una frase que resuma el tema principal de la conversación.`;
+    }
+
+    if (turnoActual === 1) {
+        prompt += `
+
+Al final de tu respuesta en este primer turno, sin importar el tema que haya preguntado el usuario, agrega un salto de línea y cierra obligatoriamente con exactamente este texto:
+"💡 **Tip:** Para darte información precisa sobre escalafón docente y requisitos según tu situación, cuéntame ¿en qué país ejerces o piensas ejercer profesionalmente?"`;
     }
 
     return prompt;
