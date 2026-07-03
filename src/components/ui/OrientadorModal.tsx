@@ -337,6 +337,16 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                                     <Link
                                         key={p.airtableId || p.slug}
                                         href={`/programas/${p.slug}`}
+                                        onClick={() => {
+                                            try {
+                                                sessionStorage.setItem(
+                                                    "ctl_orientador_ctx",
+                                                    JSON.stringify({ area, objetivo, modalidad })
+                                                );
+                                            } catch {
+                                                // sessionStorage no disponible o falló — no bloquear la navegación por esto
+                                            }
+                                        }}
                                         className="block bg-black/40 border border-white/10 rounded-lg px-4 py-3 hover:border-yellow/40 transition-colors no-underline"
                                     >
                                         <p className="text-sm font-semibold text-white">{p.nombre}</p>
