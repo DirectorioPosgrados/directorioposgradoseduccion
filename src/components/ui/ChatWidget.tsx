@@ -190,6 +190,14 @@ export default function ChatWidget({ variant, programa }: ChatWidgetProps) {
         }
     }, []);
 
+    const handleBubbleClick = useCallback(() => {
+        if (variantRef.current !== "detalle") return;
+        if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+        if (cycleTimerRef.current) clearTimeout(cycleTimerRef.current);
+        setShowBubble(false);
+        setWidgetState("open");
+    }, []);
+
     const handleMinimizedClick = useCallback(() => {
         if (variantRef.current === "detalle") {
             setWidgetState("open");
@@ -262,9 +270,15 @@ export default function ChatWidget({ variant, programa }: ChatWidgetProps) {
 
             {/* ── Burbuja de preview ── */}
             {widgetState === "preview" && showBubble && !isMobile && (
-                <div className="bg-[#0a0a0a] border border-yellow/30 rounded-2xl px-5 py-3.5 max-w-[280px] shadow-2xl relative cursor-default">
+                <div
+                    onClick={handleBubbleClick}
+                    className={`bg-[#0a0a0a] border border-yellow/30 rounded-2xl px-5 py-3.5 max-w-[280px] shadow-2xl relative ${variant === "detalle" ? "cursor-pointer" : "cursor-default"}`}
+                >
                     <button
-                        onClick={handleDismiss}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDismiss();
+                        }}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-[#0a0a0a] border border-yellow/30 rounded-full flex items-center justify-center cursor-pointer hover:border-yellow/60 transition-colors"
                     >
                         <X size={12} className="text-white/60" />
