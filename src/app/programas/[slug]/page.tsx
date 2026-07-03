@@ -8,6 +8,7 @@ import { fetchProgramas } from "@/lib/services/supabase";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { Header } from "@/components/layout/Header";
 import { TesistaActions } from "@/components/ui/TesistaActions";
+import ChatWidget from "@/components/ui/ChatWidget";
 import type { Programa } from "@/types";
 
 // ── ISR: revalidación cada 1 hora ──
@@ -229,6 +230,8 @@ export default async function ProgramaDetallePage({ params }: Props) {
                     <strong className="text-yellow">Jercol Technologies</strong>
                 </p>
             </footer>
+
+            <ChatWidget variant="detalle" programa={programa} />
         </>
     );
 }
