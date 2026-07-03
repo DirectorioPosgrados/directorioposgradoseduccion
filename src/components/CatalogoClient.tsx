@@ -14,6 +14,7 @@ import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { INSIGHTS_POR_PAIS } from "@/lib/constants/insightsMexico";
 import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import LeadModal from "@/components/ui/LeadModal";
+import ChatWidget from "@/components/ui/ChatWidget";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -414,6 +415,8 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                     </div>
                 )}
 
+                <div id="catalogo-grid-anchor" aria-hidden="true" />
+
                 {/* ── Grid de resultados ── */}
                 {!serverError && (
                     <>
@@ -463,6 +466,8 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                     <strong className="text-yellow">Jercol Technologies</strong>
                 </p>
             </footer>
+
+            <ChatWidget variant="catalogo" />
         </>
     );
 }
