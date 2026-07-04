@@ -11,7 +11,7 @@ import { orientarUsuarioConIA, type PerfilOrientador, type RespuestaOrientador }
 
 const PAISES = [
     "Sin preferencia", "México", "Colombia", "Venezuela", "Perú", "Ecuador", "Chile",
-    "Argentina", "España", "Costa Rica", "Panamá", "Cuba", "República Dominicana",
+    "Argentina", "Costa Rica", "Panamá", "Cuba", "República Dominicana",
     "Puerto Rico", "Bolivia", "Paraguay", "Uruguay", "Honduras", "El Salvador",
     "Nicaragua",
 ];
@@ -233,7 +233,7 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                             {/* Pregunta 4: País */}
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-yellow mb-2">
-                                    4. ¿Desde qué país nos visitas?
+                                    4. ¿Tienes preferencia por estudiar en algún país en especial?
                                 </label>
                                 <select
                                     value={pais}
@@ -246,6 +246,9 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
                                         </option>
                                     ))}
                                 </select>
+                                <p className="text-[11px] text-white/40 mt-1.5">
+                                    Campo opcional. Puedes dejarlo en "Sin preferencia" si quieres ver programas de varios países.
+                                </p>
                             </div>
 
                             {/* Pregunta 5: Presupuesto */}
