@@ -95,14 +95,7 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
     };
 
     const handleWhatsApp = () => {
-        const programasTexto = resultado
-            ? resultado.recomendaciones.map((r) => r.nombre).join(", ")
-            : "";
-        const texto = `Hola, me envía el Orientador Vocacional del Directorio de Posgrados.` +
-            (programasTexto
-                ? ` Me recomendaron: ${programasTexto}.`
-                : "") +
-            ` Me interesa el servicio de redacción de tesis.`;
+        const texto = "Hola, me envía el Orientador Vocacional del Directorio de Posgrados. Me interesa el servicio de redacción de tesis.";
         window.open(`https://wa.me/573005347644?text=${encodeURIComponent(texto)}`, "_blank");
     };
 

@@ -11,12 +11,12 @@ import { PRECIO_MAESTRIA_COP, PRECIO_DOCTORADO_COP, TRM_COP } from "@/config/tar
 
 /** Formatea un valor numérico como USD */
 function fmtUSD(valor: number): string {
-  return valor.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+    return valor.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    });
 }
 
 interface TesistaActionsProps {
@@ -30,13 +30,13 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
 
     const precioTesisUSD =
         nivelNormalizado.includes("maestría") ||
-        nivelNormalizado.includes("magíster") ||
-        nivelNormalizado.includes("maestria") ||
-        nivelNormalizado.includes("magister")
+            nivelNormalizado.includes("magíster") ||
+            nivelNormalizado.includes("maestria") ||
+            nivelNormalizado.includes("magister")
             ? PRECIO_MAESTRIA_COP / TRM_COP
             : nivelNormalizado.includes("doctorado")
-            ? PRECIO_DOCTORADO_COP / TRM_COP
-            : 0;
+                ? PRECIO_DOCTORADO_COP / TRM_COP
+                : 0;
 
     const totalUSD = incluirTesis ? programa.matricula + precioTesisUSD : null;
     const esDetalle = variant === "detalle";
@@ -78,11 +78,15 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
                 data-programa-pais={programa.pais}
                 data-accion="contacto_whatsapp"
                 onClick={() => {
+                    const nivelNorm = programa.nivel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                    const nombreNorm = programa.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                    const yaIncluyeNivel = nombreNorm.startsWith(nivelNorm);
+                    const programaTexto = yaIncluyeNivel ? programa.nombre : `${programa.nivel} en ${programa.nombre}`;
+
                     const mensaje = `Hola, vengo del Directorio de Posgrados. Me interesa ` +
                         `el servicio de redacción de tesis para el programa: ` +
-                        `${programa.nivel} en ${programa.nombre} — ` +
-                        `${programa.universidad}, ${programa.pais}. ` +
-                        `Total estimado por el servicio de tesis: ${fmtUSD(precioTesisUSD)}`;
+                        `${programaTexto} — ` +
+                        `${programa.universidad}, ${programa.pais}.`;
                     const text = encodeURIComponent(mensaje);
                     window.open(`https://wa.me/573005347644?text=${text}`, "_blank");
                 }}
