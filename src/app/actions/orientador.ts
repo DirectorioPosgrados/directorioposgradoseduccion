@@ -1,11 +1,12 @@
 // Archivo: src/app/actions/orientador.ts
 // Server Action: Orientador Vocacional con IA.
 // Sistema de redundancia con failover: Gemini → DeepSeek → Fallback manual.
-// Candado de caducidad: 11 de julio de 2026.
+// Candado de caducidad vía src/config/iaTrial.ts.
 
 "use server";
 
 import { fetchProgramas } from "@/lib/services/supabase";
+import { estaVencidaPruebaIA } from "@/config/iaTrial";
 import type { Programa } from "@/types";
 
 /** Perfil del usuario para el orientador vocacional */
@@ -48,8 +49,7 @@ Redacta un análisis profesional, cálido y motivador en español que siga de fo
  */
 export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<RespuestaOrientador> {
     // ── 1. Candado de caducidad ──
-    const fechaLimite = new Date("2026-07-11T23:59:59-05:00");
-    if (new Date() > fechaLimite) {
+    if (estaVencidaPruebaIA()) {
         throw new Error(
             "Período de prueba de IA finalizado. Contacte a Jercol Technologies para reactivar el servicio Premium."
         );

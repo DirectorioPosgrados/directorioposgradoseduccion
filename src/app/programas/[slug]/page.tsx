@@ -6,6 +6,7 @@
 import { notFound } from "next/navigation";
 import { fetchProgramas } from "@/lib/services/supabase";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
+import { estaVencidaPruebaIA } from "@/config/iaTrial";
 import { Header } from "@/components/layout/Header";
 import { TesistaActions } from "@/components/ui/TesistaActions";
 import ChatWidget from "@/components/ui/ChatWidget";
@@ -57,6 +58,8 @@ export default async function ProgramaDetallePage({ params }: Props) {
 
     // Obtener análisis del país desde el repositorio local (Word del cliente)
     const analisisPais = obtenerAnalisisPorPais(programa.pais);
+
+    const iaVencida = estaVencidaPruebaIA();
 
     return (
         <>
@@ -231,7 +234,7 @@ export default async function ProgramaDetallePage({ params }: Props) {
                 </p>
             </footer>
 
-            <ChatWidget variant="detalle" programa={programa} />
+            {!iaVencida && <ChatWidget variant="detalle" programa={programa} />}
         </>
     );
 }

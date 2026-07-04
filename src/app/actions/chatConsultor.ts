@@ -3,6 +3,9 @@
 // Archivo: src/app/actions/chatConsultor.ts
 // Server Action: Chat Consultor Experto en Posgrados.
 // Sistema de redundancia con failover: Gemini → DeepSeek → Fallback manual.
+// Candado de caducidad vía src/config/iaTrial.ts.
+
+import { estaVencidaPruebaIA } from "@/config/iaTrial";
 
 export interface MensajeChat {
     role: "user" | "assistant";
@@ -40,6 +43,14 @@ export async function consultarExperto(
     contextoOrientador: ContextoOrientador | null,
     turnoActual: number
 ): Promise<RespuestaConsultor> {
+    if (estaVencidaPruebaIA()) {
+        return {
+            mensaje: "En este momento no puedo conectarme. Por favor, contáctanos directamente en WhatsApp y con gusto te asesoramos sobre este programa.",
+            mensajeWhatsApp: null,
+            esTurnoFinal: false,
+        };
+    }
+
     const systemPrompt = buildSystemPrompt(contextoPrograma, contextoOrientador, turnoActual);
     const userPrompt = buildUserPrompt(historial);
 

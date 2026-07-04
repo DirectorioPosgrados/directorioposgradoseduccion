@@ -15,6 +15,7 @@ import { INSIGHTS_POR_PAIS } from "@/lib/constants/insightsMexico";
 import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import LeadModal from "@/components/ui/LeadModal";
 import ChatWidget from "@/components/ui/ChatWidget";
+import { estaVencidaPruebaIA } from "@/config/iaTrial";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -34,6 +35,8 @@ interface CatalogoClientProps {
 }
 
 export default function CatalogoClient({ inicialProgramas, serverError }: CatalogoClientProps) {
+    const iaVencida = estaVencidaPruebaIA();
+
     // ── Estados de filtro ──
     const [activeFilter, setActiveFilter] = useState("Todos");       // País
     const [nivelFilter, setNivelFilter] = useState("Todos");         // Nivel
@@ -235,15 +238,17 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
             <StatsBarDynamic programas={inicialProgramas} />
 
             {/* ── Botón Orientador Vocacional IA ── */}
-            <div className="max-w-[1100px] mx-auto px-10 mt-8 max-sm:px-5">
-                <button
-                    onClick={() => setOrientadorAbierto(true)}
-                    className="w-full font-sans text-sm font-bold tracking-[0.5px] uppercase bg-gradient-to-r from-black to-gray-bg border-2 border-yellow text-yellow rounded-xl px-8 py-4 cursor-pointer transition-all hover:bg-yellow hover:text-black flex items-center justify-center gap-2"
-                >
-                    <span className="text-lg">🧠</span>
-                    Orientador Vocacional de IA — Descubre tu posgrado ideal en 3 preguntas
-                </button>
-            </div>
+            {!iaVencida && (
+                <div className="max-w-[1100px] mx-auto px-10 mt-8 max-sm:px-5">
+                    <button
+                        onClick={() => setOrientadorAbierto(true)}
+                        className="w-full font-sans text-sm font-bold tracking-[0.5px] uppercase bg-gradient-to-r from-black to-gray-bg border-2 border-yellow text-yellow rounded-xl px-8 py-4 cursor-pointer transition-all hover:bg-yellow hover:text-black flex items-center justify-center gap-2"
+                    >
+                        <span className="text-lg">🧠</span>
+                        Orientador Vocacional de IA — Descubre tu posgrado ideal en 3 preguntas
+                    </button>
+                </div>
+            )}
 
             <main id="catalogo" className="max-w-[1100px] mx-auto px-10 py-[52px_40px_80px] max-sm:px-5 max-sm:py-9">
                 {/* ── Filtros superiores ── */}
@@ -454,10 +459,12 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
             </main>
 
             {/* ── Modal del Orientador Vocacional IA ── */}
-            <OrientadorModal
-                abierto={orientadorAbierto}
-                onCerrar={() => setOrientadorAbierto(false)}
-            />
+            {!iaVencida && (
+                <OrientadorModal
+                    abierto={orientadorAbierto}
+                    onCerrar={() => setOrientadorAbierto(false)}
+                />
+            )}
 
             {/* ── Footer ── */}
             <footer className="bg-black text-center px-10 py-7 text-[13px]">
@@ -467,7 +474,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                 </p>
             </footer>
 
-            <ChatWidget variant="catalogo" />
+            {!iaVencida && <ChatWidget variant="catalogo" />}
         </>
     );
 }
