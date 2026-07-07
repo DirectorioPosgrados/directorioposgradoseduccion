@@ -27,7 +27,7 @@ export function Hero({ onSearch }: HeroProps) {
 
             <h1 className="font-sans font-bold text-[clamp(32px,4.5vw,52px)] leading-[1.1] tracking-[-1px] mb-4 text-left">
               Directorio de{" "}
-              <em className="not-italic text-yellow">Posgrados en Educación</em>{" "}
+              <em className="not-italic text-yellow">Posgrados en Educación de Latinoamérica</em>{" "}
               2026
             </h1>
 
