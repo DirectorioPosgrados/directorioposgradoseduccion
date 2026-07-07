@@ -19,7 +19,7 @@ const PAISES_RESTO = [
 
 const NIVELES_INTERES = ["Maestría", "Doctorado", "Quiero explorar el directorio"];
 
-const AREAS_INTERES = ["Educación", "Pedagogía", "Gestión Educativa", "TIC en Educación", "Ciencias Sociales"];
+const AREAS_INTERES = ["Educación", "Pedagogía", "Gestión Educativa", "TIC en Educación"];
 
 interface LeadModalProps {
     onVisibilidadChange?: (visible: boolean) => void;
@@ -205,11 +205,7 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
                 </div>
 
                 <p className="text-[11px] text-white/40 leading-relaxed mt-4 text-center">
-                    Al registrarte obtienes acceso completo al directorio y a un
-                    sistema de orientación inteligente que analiza tu perfil y te
-                    dice exactamente qué programa conviene más según tu país,
-                    objetivo y presupuesto — sin rodeos. Tu información es privada
-                    y nunca será compartida con terceros.
+                    Con tu registro, obtendrás acceso total al directorio y a nuestra calculadora de inversión para posgrados, con el servicio opcional de redacción de tesis. Sin complicaciones. Tu información está segura y nunca la compartiremos con terceros.
                 </p>
             </div>
         </div>
