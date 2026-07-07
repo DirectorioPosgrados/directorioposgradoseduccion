@@ -5,7 +5,7 @@
 
 "use server";
 
-import { fetchProgramas } from "@/lib/services/supabase";
+import { fetchProgramas, fetchTarifas, type Tarifas } from "@/lib/services/supabase";
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
 import type { Programa } from "@/types";
 
@@ -25,7 +25,11 @@ export interface RespuestaOrientador {
 }
 
 /** System prompt comercial unificado (usado por todos los proveedores y el fallback) */
-const SYSTEM_PROMPT = `Eres un orientador vocacional premium de Comunidad Tesista en Latinoamérica. Tu misión es analizar el perfil del usuario y los 5 programas que el sistema ha identificado como los más relevantes para tu perfil para persuadirlo de dar el siguiente paso en su crecimiento profesional.
+function buildSystemPrompt(tarifas: Tarifas): string {
+    const maestriaUSD = Math.round(tarifas.precioMaestriaCop / tarifas.trmCop);
+    const doctoradoUSD = Math.round(tarifas.precioDoctoradoCop / tarifas.trmCop);
+
+    return `Eres un orientador vocacional premium de Comunidad Tesista en Latinoamérica. Tu misión es analizar el perfil del usuario y los 5 programas que el sistema ha identificado como los más relevantes para tu perfil para persuadirlo de dar el siguiente paso en su crecimiento profesional.
 
 Redacta un análisis profesional, cálido y motivador en español que siga de forma estricta estas pautas:
 
@@ -36,12 +40,13 @@ Redacta un análisis profesional, cálido y motivador en español que siga de fo
 
 2. Manejo de Precios y Beneficios:
 - Jamás escribas textualmente montos de "$0 USD" o precios vacíos. Si un programa viene con valor 0 en la base de datos, tradúcelo comercialmente como un "Programa con opción de Beca Completa", "Convenio Pro Bono" o "Financiamiento Especial con la institución".
-- Cierre comercial sutil: Concluye tu texto recordando que el verdadero reto de estos posgrados es la investigación de grado, y que Comunidad Tesista cuenta con planes especiales para asegurar la redacción de su tesis por un costo preferencial ($862 USD para Maestrías y $1,500 USD para Doctorados) para que puedan estudiar sin preocupaciones.
+- Cierre comercial sutil: Concluye tu texto recordando que el verdadero reto de estos posgrados es la investigación de grado, y que Comunidad Tesista cuenta con planes especiales para asegurar la redacción de su tesis por un costo preferencial ($${maestriaUSD} USD para Maestrías y $${doctoradoUSD} USD para Doctorados) para que puedan estudiar sin preocupaciones.
 
 3. Formato y Extensión:
 - Usa negritas de Markdown (**texto**) de forma selectiva para resaltar conceptos clave en cada párrafo (como las universidades, palabras como 'beca completa' o 'convenio pro bono', y los precios de las tesis). Esto romperá la densidad visual y facilitará el escaneo rápido sin perder profundidad.
 - Usa saltos de línea dobles entre párrafos para que la lectura sea sumamente limpia.
 - Mantén el texto directo, ejecutivo y con un límite máximo de 350 palabras.`;
+}
 
 /**
  * Orienta al usuario con IA analizando su perfil y recomendando los 5 mejores programas.
@@ -55,9 +60,15 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
         );
     }
 
+    // ── Obtener tarifas dinámicas desde Supabase ──
+    const tarifas = await fetchTarifas();
+
     // ── Obtener y filtrar programas desde Airtable ──
     const programas = await fetchProgramas();
     const recomendaciones = filtrarRecomendaciones(programas, perfil);
+
+    // ── Construir system prompt con tarifas reales ──
+    const systemPromptFinal = buildSystemPrompt(tarifas);
 
     // ── Construir user prompt ──
     const userPrompt = buildUserPrompt(perfil, recomendaciones);
@@ -67,7 +78,7 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
     if (geminiKey) {
         try {
             console.log("[Orientador IA] Intentando Gemini...");
-            const mensaje = await callGemini(geminiKey, SYSTEM_PROMPT, userPrompt);
+            const mensaje = await callGemini(geminiKey, systemPromptFinal, userPrompt);
             if (mensaje) return { mensaje, recomendaciones };
         } catch (err) {
             console.warn("[Orientador IA] Gemini falló:", err instanceof Error ? err.message : err);
@@ -79,7 +90,7 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
     if (deepseekKey) {
         try {
             console.log("[Orientador IA] Intentando DeepSeek...");
-            const mensaje = await callDeepSeek(deepseekKey, SYSTEM_PROMPT, userPrompt);
+            const mensaje = await callDeepSeek(deepseekKey, systemPromptFinal, userPrompt);
             if (mensaje) return { mensaje, recomendaciones };
         } catch (err) {
             console.warn("[Orientador IA] DeepSeek falló:", err instanceof Error ? err.message : err);
@@ -89,7 +100,7 @@ export async function orientarUsuarioConIA(perfil: PerfilOrientador): Promise<Re
     // ── 4. Fallback final: respuesta estructurada sin dependencias externas ──
     console.log("[Orientador IA] Usando respuesta de fallback manual");
     return {
-        mensaje: generarRespuestaFallback(perfil),
+        mensaje: generarRespuestaFallback(perfil, tarifas),
         recomendaciones,
     };
 }
@@ -288,14 +299,17 @@ Por favor, oriéntame sobre cuál de estos programas es el mejor para mi perfil 
 }
 
 /** Fallback manual cuando ningún proveedor de IA está disponible */
-function generarRespuestaFallback(perfil: PerfilOrientador): string {
+function generarRespuestaFallback(perfil: PerfilOrientador, tarifas: Tarifas): string {
     const modalidadTexto = perfil.modalidad.toLowerCase() === 'todas'
         ? 'flexible (virtual o presencial)'
         : perfil.modalidad;
+
+    const maestriaUSD = Math.round(tarifas.precioMaestriaCop / tarifas.trmCop);
+    const doctoradoUSD = Math.round(tarifas.precioDoctoradoCop / tarifas.trmCop);
 
     return `¡Hola! Con base en tu perfil enfocado en el área de ${perfil.area}, veo que tu meta principal es lograr tu ${perfil.objetivo} mediante una modalidad de estudio ${modalidadTexto}. Para los profesionales de la educación en Latinoamérica, dar este paso estratégico es la llave definitiva para abrir nuevas puertas y ascender con solidez en el escalafón docente.
 
 Las opciones seleccionadas a continuación destacan por su alta adaptabilidad y prestigio institucional. Es importante resaltar que algunas de estas alternativas cuentan con convenios Pro Bono o beneficios de Beca Completa, lo que representa una oportunidad financiera inmejorable para alcanzar tus metas académicas sin comprometer tu presupuesto actual.
 
-Recuerda que el verdadero desafío de estos posgrados de alto nivel radica en la etapa de investigación de grado. Para que puedas enfocarte plenamente en tu aprendizaje, Comunidad Tesista cuenta con planes de acompañamiento preferenciales en pesos colombianos para la redacción de tu tesis ($862 USD para Maestrías y $1,500 USD para Doctorados), garantizando tu titulación con éxito y permitiéndote avanzar sin preocupaciones académicas.`;
+Recuerda que el verdadero desafío de estos posgrados de alto nivel radica en la etapa de investigación de grado. Para que puedas enfocarte plenamente en tu aprendizaje, Comunidad Tesista cuenta con planes de acompañamiento preferenciales en pesos colombianos para la redacción de tu tesis ($${maestriaUSD} USD para Maestrías y $${doctoradoUSD} USD para Doctorados), garantizando tu titulación con éxito y permitiéndote avanzar sin preocupaciones académicas.`;
 }

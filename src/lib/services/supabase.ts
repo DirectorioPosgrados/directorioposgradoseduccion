@@ -31,6 +31,34 @@ function mapRow(row: Record<string, unknown>): Programa {
     }
 }
 
+export interface Tarifas {
+    trmCop: number;
+    precioMaestriaCop: number;
+    precioDoctoradoCop: number;
+}
+
+export async function fetchTarifas(): Promise<Tarifas> {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+        .from('tarifas_tesis')
+        .select('trm_cop, precio_maestria_cop, precio_doctorado_cop')
+        .eq('id', 1)
+        .single();
+
+    if (error || !data) {
+        console.error('[Supabase] Error obteniendo tarifas:', error?.message);
+        // Fallback defensivo con los últimos valores conocidos, para que la app nunca se rompa
+        return { trmCop: 4000, precioMaestriaCop: 3450000, precioDoctoradoCop: 6000000 };
+    }
+
+    return {
+        trmCop: Number(data.trm_cop),
+        precioMaestriaCop: Number(data.precio_maestria_cop),
+        precioDoctoradoCop: Number(data.precio_doctorado_cop),
+    };
+}
+
 export async function fetchProgramas(): Promise<Programa[]> {
     const supabase = getSupabaseClient()
 

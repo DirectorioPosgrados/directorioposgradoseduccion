@@ -6,6 +6,7 @@
 // Candado de caducidad vía src/config/iaTrial.ts.
 
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
+import { fetchTarifas, type Tarifas } from "@/lib/services/supabase";
 
 export interface MensajeChat {
     role: "user" | "assistant";
@@ -51,7 +52,8 @@ export async function consultarExperto(
         };
     }
 
-    const systemPrompt = buildSystemPrompt(contextoPrograma, contextoOrientador, turnoActual);
+    const tarifas = await fetchTarifas();
+    const systemPrompt = buildSystemPrompt(contextoPrograma, contextoOrientador, turnoActual, tarifas);
     const userPrompt = buildUserPrompt(historial);
 
     // ── 1. Intentar Gemini ──
@@ -158,7 +160,8 @@ async function callDeepSeek(apiKey: string, systemPrompt: string, historial: Men
 function buildSystemPrompt(
     programa: ContextoPrograma,
     orientador: ContextoOrientador | null,
-    turnoActual: number
+    turnoActual: number,
+    tarifas: Tarifas
 ): string {
     const costoStr = programa.costo_usd === 0
         ? 'Beca Completa / Convenio Pro Bono'
@@ -195,7 +198,7 @@ DISCLAIMER OBLIGATORIO en cada respuesta sobre escalafón: "Estos son rangos de 
 
 Si el usuario pregunta sobre financiamiento del posgrado, no especules. Indícale que consulte la página oficial del programa en la universidad. No menciones becas, créditos ni convenios que no estén en el contexto del programa.
 
-A partir del turno 4, orienta sutilmente hacia el servicio de redacción de tesis de CTL. Menciona que la tesis es el verdadero reto del posgrado y que el servicio cuesta $862 USD para Maestrías y $1,500 USD para Doctorados.`;
+A partir del turno 4, orienta sutilmente hacia el servicio de redacción de tesis de CTL. Menciona que la tesis es el verdadero reto del posgrado y que el servicio cuesta $${Math.round(tarifas.precioMaestriaCop / tarifas.trmCop)} USD para Maestrías y $${Math.round(tarifas.precioDoctoradoCop / tarifas.trmCop)} USD para Doctorados.`;
 
     if (turnoActual >= 6) {
         prompt += `
