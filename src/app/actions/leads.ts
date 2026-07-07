@@ -7,7 +7,9 @@ interface LeadData {
     apellido: string
     telefono: string
     correo: string
-    pais: string
+    pais?: string | null
+    nivelInteres?: string | null
+    areaInteres?: string | null
 }
 
 export async function submitLead(
@@ -27,7 +29,9 @@ export async function submitLead(
                     apellido: data.apellido.trim(),
                     telefono: data.telefono.trim(),
                     correo: data.correo.trim().toLowerCase(),
-                    pais: data.pais,
+                    pais: data.pais ?? null,
+                    nivel_interes: data.nivelInteres ?? null,
+                    area_interes: data.areaInteres ?? null,
                 },
                 { onConflict: 'correo' }
             )

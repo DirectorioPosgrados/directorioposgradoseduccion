@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-export function Header() {
+interface HeaderProps {
+  ocultarNavegacion?: boolean;
+}
+
+export function Header({ ocultarNavegacion = false }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -25,30 +29,32 @@ export function Header() {
         <span className="block w-6 h-[2px] bg-black transition-all" />
       </button>
 
-      <nav
-        className={`flex items-center gap-1 max-sm:flex-col max-sm:absolute max-sm:top-16 max-sm:left-0 max-sm:right-0 max-sm:bg-gray-bg max-sm:border-b-2 max-sm:border-black max-sm:p-3 max-sm:gap-1 ${menuOpen ? "max-sm:flex" : "max-sm:hidden"
-          }`}
-      >
-        <a
-          href="#catalogo"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
-            setMenuOpen(false);
-          }}
-          className="font-sans font-medium text-[15px] tracking-[-0.2px] no-underline text-yellow px-3.5 py-2 rounded-sm transition-colors hover:bg-yellow hover:text-black leading-tight"
+      {!ocultarNavegacion && (
+        <nav
+          className={`flex items-center gap-1 max-sm:flex-col max-sm:absolute max-sm:top-16 max-sm:left-0 max-sm:right-0 max-sm:bg-gray-bg max-sm:border-b-2 max-sm:border-black max-sm:p-3 max-sm:gap-1 ${menuOpen ? "max-sm:flex" : "max-sm:hidden"
+            }`}
         >
-          Programas
-        </a>
-        <a
-          href="https://comunidadtesistadelatinoamerica.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-sans font-medium text-[15px] tracking-[-0.2px] no-underline text-yellow px-3.5 py-2 rounded-sm transition-colors hover:bg-yellow hover:text-black leading-tight"
-        >
-          CTL
-        </a>
-      </nav>
+          <a
+            href="#catalogo"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+              setMenuOpen(false);
+            }}
+            className="font-sans font-medium text-[15px] tracking-[-0.2px] no-underline text-yellow px-3.5 py-2 rounded-sm transition-colors hover:bg-yellow hover:text-black leading-tight"
+          >
+            Programas
+          </a>
+          <a
+            href="https://comunidadtesistadelatinoamerica.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-sans font-medium text-[15px] tracking-[-0.2px] no-underline text-yellow px-3.5 py-2 rounded-sm transition-colors hover:bg-yellow hover:text-black leading-tight"
+          >
+            CTL
+          </a>
+        </nav>
+      )}
     </header>
   );
 }

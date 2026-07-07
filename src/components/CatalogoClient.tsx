@@ -36,6 +36,7 @@ interface CatalogoClientProps {
 
 export default function CatalogoClient({ inicialProgramas, serverError }: CatalogoClientProps) {
     const iaVencida = estaVencidaPruebaIA();
+    const [leadModalVisible, setLeadModalVisible] = useState(false);
 
     // ── Estados de filtro ──
     const [activeFilter, setActiveFilter] = useState("Todos");       // País
@@ -231,8 +232,8 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
 
     return (
         <>
-            <LeadModal />
-            <Header />
+            <LeadModal onVisibilidadChange={setLeadModalVisible} />
+            <Header ocultarNavegacion={leadModalVisible} />
             <Hero onSearch={handleSearch} />
             <PresentacionInvestigacion />
             <StatsBarDynamic programas={inicialProgramas} />
@@ -474,7 +475,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                 </p>
             </footer>
 
-            {!iaVencida && <ChatWidget variant="catalogo" />}
+            {!iaVencida && !leadModalVisible && <ChatWidget variant="catalogo" />}
         </>
     );
 }

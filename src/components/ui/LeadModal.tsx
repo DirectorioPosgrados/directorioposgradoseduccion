@@ -17,26 +17,38 @@ const PAISES_RESTO = [
     "Reino Unido", "Rusia", "Sudáfrica", "Suiza", "Turquía", "Otro",
 ];
 
-export default function LeadModal() {
+const NIVELES_INTERES = ["Maestría", "Doctorado", "Quiero explorar el directorio"];
+
+const AREAS_INTERES = ["Educación", "Pedagogía", "Gestión Educativa", "TIC en Educación", "Ciencias Sociales"];
+
+interface LeadModalProps {
+    onVisibilidadChange?: (visible: boolean) => void;
+}
+
+export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
     const [visible, setVisible] = useState(false);
-    const [nombre, setNombre] = useState("");
-    const [apellido, setApellido] = useState("");
+    const [nombreCompleto, setNombreCompleto] = useState("");
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
     const [pais, setPais] = useState("");
+    const [nivelInteres, setNivelInteres] = useState<string | null>(null);
+    const [areaInteres, setAreaInteres] = useState<string | null>(null);
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const yaRegistrado = localStorage.getItem("ctl_lead_email");
-        if (!yaRegistrado) setVisible(true);
+        if (!yaRegistrado) {
+            setVisible(true);
+            onVisibilidadChange?.(true);
+        }
     }, []);
 
     if (!visible) return null;
 
     const handleSubmit = async () => {
-        if (!nombre.trim() || !apellido.trim() || !telefono.trim() || !correo.trim() || !pais) {
-            setError("Por favor completa todos los campos.");
+        if (!nombreCompleto.trim() || !telefono.trim() || !correo.trim()) {
+            setError("Por favor completa los campos obligatorios.");
             return;
         }
 
@@ -46,21 +58,28 @@ export default function LeadModal() {
             return;
         }
 
+        const partes = nombreCompleto.trim().split(/\s+/);
+        const nombre = partes[0] ?? "";
+        const apellido = partes.slice(1).join(" ") || "";
+
         setEnviando(true);
         setError(null);
 
         try {
             const result = await submitLead({
-                nombre: nombre.trim(),
-                apellido: apellido.trim(),
+                nombre,
+                apellido,
                 telefono: telefono.trim(),
                 correo: correo.trim(),
-                pais,
+                pais: pais || null,
+                nivelInteres,
+                areaInteres,
             });
 
             if (result.ok) {
                 localStorage.setItem("ctl_lead_email", correo.trim());
                 setVisible(false);
+                onVisibilidadChange?.(false);
             } else {
                 setError(result.message ?? "Error inesperado.");
             }
@@ -70,8 +89,8 @@ export default function LeadModal() {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/60">
-            <div className="bg-[#0a0a0a] border border-yellow/30 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-[#0a0a0a] border border-yellow/30 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <span className="text-[10px] font-bold tracking-widest text-yellow uppercase mb-4 block">
                     ✦ DIRECTORIO DE POSGRADOS DE EDUCACIÓN
                 </span>
@@ -88,16 +107,9 @@ export default function LeadModal() {
                 <div>
                     <input
                         type="text"
-                        placeholder="Nombre"
-                        value={nombre}
-                        onChange={(e) => setNombre(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-yellow/50 mb-3"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Apellido"
-                        value={apellido}
-                        onChange={(e) => setApellido(e.target.value)}
+                        placeholder="Primer nombre y primer apellido"
+                        value={nombreCompleto}
+                        onChange={(e) => setNombreCompleto(e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-yellow/50 mb-3"
                     />
                     <input
@@ -117,7 +129,7 @@ export default function LeadModal() {
                     <select
                         value={pais}
                         onChange={(e) => setPais(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow/50"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-yellow/50 mb-3"
                     >
                         <option value="" disabled className="bg-[#0a0a0a] text-white/30">
                             Selecciona tu país
@@ -134,6 +146,50 @@ export default function LeadModal() {
                             </option>
                         ))}
                     </select>
+
+                    {/* ── Nivel de posgrado (opcional) ── */}
+                    <div className="mb-3">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-yellow mb-2">
+                            ¿Qué nivel de posgrado te interesa? (opcional)
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {NIVELES_INTERES.map((n) => (
+                                <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setNivelInteres(nivelInteres === n ? null : n)}
+                                    className={`font-sans text-[13px] font-medium px-3.5 py-1.5 border-2 rounded-full cursor-pointer transition-all ${nivelInteres === n
+                                        ? "bg-yellow border-yellow text-black"
+                                        : "bg-black/40 border-white/20 text-white/70 hover:border-yellow/50"
+                                        }`}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* ── Área de interés (opcional) ── */}
+                    <div className="mb-3">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-yellow mb-2">
+                            ¿Cuál es tu área de interés? (opcional)
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {AREAS_INTERES.map((a) => (
+                                <button
+                                    key={a}
+                                    type="button"
+                                    onClick={() => setAreaInteres(areaInteres === a ? null : a)}
+                                    className={`font-sans text-[13px] font-medium px-3.5 py-1.5 border-2 rounded-full cursor-pointer transition-all ${areaInteres === a
+                                        ? "bg-yellow border-yellow text-black"
+                                        : "bg-black/40 border-white/20 text-white/70 hover:border-yellow/50"
+                                        }`}
+                                >
+                                    {a}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     {error && (
                         <p className="text-red-400 text-xs mt-1 mb-2">{error}</p>
