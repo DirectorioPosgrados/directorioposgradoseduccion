@@ -92,11 +92,10 @@ export function Card({ programa, index }: CardProps) {
                 Duración / Modalidad
               </p>
               <p className="text-sm font-semibold text-black leading-tight">
-                {programa.duracion} Meses
-                <br />
-                <small className="text-xs font-medium text-gray-text">
-                  {programa.modalidad}
-                </small>
+                {programa.duracion} Meses / {programa.modalidad}
+              </p>
+              <p className="text-xs font-medium text-gray-text mt-1">
+                {programa.requisito_grado || "No especificado"}
               </p>
             </div>
           </div>

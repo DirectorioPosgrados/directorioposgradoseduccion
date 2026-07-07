@@ -18,7 +18,7 @@ const SLIDES: Slide[] = [
   },
   {
     logo: "/images/logo-vertical-blanco.png",
-    mensaje: "¿Necesitas ayuda urgente con tu proyecto de grado? Chatea directamente con un asesor académico.",
+    mensaje: "¿Necesitas ayuda con tu tesis? Chatea directamente con un asesor académico.",
     ctaTexto: "COTIZAR POR WHATSAPP →",
     link: "https://wa.me/573005347644?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20el%20servicio%20de%20redacci%C3%B3n",
   },
@@ -49,9 +49,8 @@ export function BannerRotativo() {
 
   return (
     <div
-      className={`bg-white/[0.04] border border-white/10 rounded-xl p-6 min-h-[150px] w-full flex flex-col sm:flex-row items-center gap-6 transition-opacity duration-300 relative ${
-        fade ? "opacity-100" : "opacity-0"
-      }`}
+      className={`bg-white/[0.04] border border-white/10 rounded-xl p-6 min-h-[150px] w-full flex flex-col sm:flex-row items-center gap-6 transition-opacity duration-300 relative ${fade ? "opacity-100" : "opacity-0"
+        }`}
     >
       {slide.logo && (
         <img
@@ -91,9 +90,8 @@ export function BannerRotativo() {
                 }, 300);
               }
             }}
-            className={`w-1.5 h-1.5 rounded-full border-none cursor-pointer transition-colors ${
-              i === current ? "bg-yellow" : "bg-white/20 hover:bg-white/40"
-            }`}
+            className={`w-1.5 h-1.5 rounded-full border-none cursor-pointer transition-colors ${i === current ? "bg-yellow" : "bg-white/20 hover:bg-white/40"
+              }`}
             aria-label={`Slide ${i + 1}`}
           />
         ))}

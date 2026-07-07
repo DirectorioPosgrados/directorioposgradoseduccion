@@ -45,6 +45,9 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
         <div className="flex flex-col gap-2 w-full">
             {precioTesisUSD > 0 && (
                 <div className={`flex flex-col gap-1.5 ${esDetalle ? "bg-white/5 border border-white/10 rounded-xl p-5" : ""}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${esDetalle ? "text-white/50" : "text-gray-text"}`}>
+                        Calcula aquí el costo de tu inversión
+                    </p>
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                         <input type="checkbox" checked={incluirTesis} onChange={(e) => setIncluirTesis(e.target.checked)} className="peer sr-only" />
                         <span className={`w-4 h-4 border-2 rounded-[3px] flex items-center justify-center transition-colors peer-checked:bg-yellow peer-checked:border-yellow peer-focus:outline-none ${esDetalle ? "border-white/40" : "border-gray-400"}`}>
@@ -55,7 +58,7 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
                             )}
                         </span>
                         <span className={`text-xs font-medium ${esDetalle ? "text-white/80" : "text-black/80"}`}>
-                            Incluir redacción de tesis ({fmtUSD(precioTesisUSD)})
+                            Posgrado + Servicio de redacción de tesis.
                         </span>
                     </label>
 
