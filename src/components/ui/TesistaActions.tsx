@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import type { Programa } from "@/types";
-import { PRECIO_MAESTRIA_COP, PRECIO_DOCTORADO_COP, TRM_COP } from "@/config/tarifasTesis";
+import type { Tarifas } from "@/lib/services/supabase";
 
 /** Formatea un valor numérico como USD */
 function fmtUSD(valor: number): string {
@@ -22,9 +22,10 @@ function fmtUSD(valor: number): string {
 interface TesistaActionsProps {
     programa: Programa;
     variant?: "card" | "detalle";
+    tarifas: Tarifas;
 }
 
-export function TesistaActions({ programa, variant = "card" }: TesistaActionsProps) {
+export function TesistaActions({ programa, variant = "card", tarifas }: TesistaActionsProps) {
     const [incluirTesis, setIncluirTesis] = useState(false);
     const nivelNormalizado = programa.nivel.toLowerCase();
 
@@ -33,9 +34,9 @@ export function TesistaActions({ programa, variant = "card" }: TesistaActionsPro
             nivelNormalizado.includes("magíster") ||
             nivelNormalizado.includes("maestria") ||
             nivelNormalizado.includes("magister")
-            ? PRECIO_MAESTRIA_COP / TRM_COP
+            ? tarifas.precioMaestriaCop / tarifas.trmCop
             : nivelNormalizado.includes("doctorado")
-                ? PRECIO_DOCTORADO_COP / TRM_COP
+                ? tarifas.precioDoctoradoCop / tarifas.trmCop
                 : 0;
 
     const totalUSD = incluirTesis ? programa.matricula + precioTesisUSD : null;

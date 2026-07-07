@@ -4,6 +4,7 @@
 // Función de venta cruzada: checkbox para incluir redacción de tesis con cálculo unificado en COP.
 
 import type { Programa } from "@/types";
+import type { Tarifas } from "@/lib/services/supabase";
 import { badgeClass, fmtUSD } from "@/lib/utils";
 import { TesistaActions } from "@/components/ui/TesistaActions";
 import Link from "next/link";
@@ -11,9 +12,10 @@ import Link from "next/link";
 interface CardProps {
   programa: Programa;
   index: number;
+  tarifas: Tarifas;
 }
 
-export function Card({ programa, index }: CardProps) {
+export function Card({ programa, index, tarifas }: CardProps) {
   const bc = badgeClass(programa.pais);
   const delay = 0.05 + index * 0.07;
 
@@ -112,7 +114,7 @@ export function Card({ programa, index }: CardProps) {
           Ver Programa
         </Link>
 
-        <TesistaActions programa={programa} variant="card" />
+        <TesistaActions programa={programa} variant="card" tarifas={tarifas} />
       </div>
     </article>
   );

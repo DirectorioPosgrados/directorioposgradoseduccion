@@ -16,6 +16,7 @@ import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import LeadModal from "@/components/ui/LeadModal";
 import ChatWidget from "@/components/ui/ChatWidget";
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
+import type { Tarifas } from "@/lib/services/supabase";
 import type { Programa } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -32,9 +33,10 @@ const PRICE_RANGES = [
 interface CatalogoClientProps {
     inicialProgramas: Programa[];
     serverError: string | null;
+    tarifas: Tarifas;
 }
 
-export default function CatalogoClient({ inicialProgramas, serverError }: CatalogoClientProps) {
+export default function CatalogoClient({ inicialProgramas, serverError, tarifas }: CatalogoClientProps) {
     const iaVencida = estaVencidaPruebaIA();
     const [leadModalVisible, setLeadModalVisible] = useState(false);
 
@@ -430,7 +432,7 @@ export default function CatalogoClient({ inicialProgramas, serverError }: Catalo
                             {visibleProgramas.map((p, i) => (
                                 // airtableId es el ID nativo de Airtable (recXXXXXXXXXXXX), garantiza unicidad global.
                                 // No usar p.id porque es el "ID Programa" manual y puede tener duplicados.
-                                <Card key={p.airtableId || `${p.id}-${i}`} programa={p} index={i} />
+                                <Card key={p.airtableId || `${p.id}-${i}`} programa={p} index={i} tarifas={tarifas} />
                             ))}
                         </div>
 

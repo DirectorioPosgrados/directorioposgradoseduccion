@@ -1,4 +1,4 @@
-import { fetchProgramas } from "@/lib/services/supabase";
+import { fetchProgramas, fetchTarifas, type Tarifas } from "@/lib/services/supabase";
 import CatalogoClient from "@/components/CatalogoClient";
 import type { Programa } from "@/types";
 
@@ -8,6 +8,7 @@ export const maxDuration = 180;
 export default async function HomePage() {
     let programas: Programa[] = [];
     let error: string | null = null;
+    let tarifas: Tarifas = { trmCop: 4000, precioMaestriaCop: 3450000, precioDoctoradoCop: 6000000 };
 
     try {
         programas = await fetchProgramas();
@@ -20,5 +21,11 @@ export default async function HomePage() {
                 : "Error inesperado al cargar los datos.";
     }
 
-    return <CatalogoClient inicialProgramas={programas} serverError={error} />;
+    try {
+        tarifas = await fetchTarifas();
+    } catch {
+        // Mantener fallback, no mostrar error de tarifas al usuario
+    }
+
+    return <CatalogoClient inicialProgramas={programas} serverError={error} tarifas={tarifas} />;
 }

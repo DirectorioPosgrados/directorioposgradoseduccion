@@ -4,7 +4,7 @@
 // Incluye análisis de mercado del país desde el repositorio local del Word del cliente.
 
 import { notFound } from "next/navigation";
-import { fetchProgramas } from "@/lib/services/supabase";
+import { fetchProgramas, fetchTarifas, type Tarifas } from "@/lib/services/supabase";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
 import { Header } from "@/components/layout/Header";
@@ -60,6 +60,8 @@ export default async function ProgramaDetallePage({ params }: Props) {
     const analisisPais = obtenerAnalisisPorPais(programa.pais);
 
     const iaVencida = estaVencidaPruebaIA();
+
+    const tarifas = await fetchTarifas();
 
     return (
         <>
@@ -178,7 +180,7 @@ export default async function ProgramaDetallePage({ params }: Props) {
                             )}
 
                             {/* ── Checkbox de tesis + Cotizar tesis con CTL ── */}
-                            <TesistaActions programa={programa} variant="detalle" />
+                            <TesistaActions programa={programa} variant="detalle" tarifas={tarifas} />
                         </div>
 
                         {/* Columna derecha: Análisis del país */}
