@@ -2,7 +2,7 @@
 // Fuente única de verdad para el vencimiento de la cortesía de 15 días de IA.
 // Cubre: Orientador Vocacional, Chat Consultor Experto, y cualquier módulo futuro de IA.
 
-export const IA_TRIAL_DEADLINE = new Date("2026-07-21T23:59:59-05:00");
+export const IA_TRIAL_DEADLINE = new Date("2026-07-24T23:59:59-05:00");
 
 /**
  * Retorna true si la cortesía de 15 días de IA ya venció.
