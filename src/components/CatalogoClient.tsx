@@ -16,6 +16,7 @@ import { OrientadorModal } from "@/components/ui/OrientadorModal";
 import LeadModal from "@/components/ui/LeadModal";
 import ChatWidget from "@/components/ui/ChatWidget";
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
+import { trackEvent } from "@/lib/tracking";
 import type { Tarifas } from "@/lib/services/supabase";
 import type { Programa } from "@/types";
 
@@ -194,9 +195,18 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
         setVisibleCount(PAGE_SIZE);
     };
 
-    const handlePriceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setPriceRange(Number(e.target.value));
+    const handleFilterChangeWithTracking = (setter: (v: string) => void, tipo: string) => (val: string) => {
+        setter(val);
         setVisibleCount(PAGE_SIZE);
+        trackEvent("filtro_uso", { tipo, valor: val });
+    };
+
+    const handlePriceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const index = Number(e.target.value);
+        setPriceRange(index);
+        setVisibleCount(PAGE_SIZE);
+        const rango = PRICE_RANGES[index]?.label ?? "Todos";
+        trackEvent("filtro_uso", { tipo: "precio", valor: rango });
     };
 
     // ── Números visibles para el contador ──
@@ -264,7 +274,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
                                     ? "bg-black border-yellow text-yellow"
                                     : "bg-black border-black text-yellow hover:border-yellow"
                                     }`}
-                                onClick={() => handleFilterChange(setActiveFilter)("Todos")}
+                                onClick={() => handleFilterChangeWithTracking(setActiveFilter, "pais")("Todos")}
                             >
                                 Todos
                             </button>
@@ -275,7 +285,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
                                         ? "bg-black border-yellow text-yellow"
                                         : "bg-black border-black text-yellow hover:border-yellow"
                                         }`}
-                                    onClick={() => handleFilterChange(setActiveFilter)(pais)}
+                                    onClick={() => handleFilterChangeWithTracking(setActiveFilter, "pais")(pais)}
                                 >
                                     {pais}
                                 </button>
@@ -287,7 +297,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
                             {/* Nivel */}
                             <select
                                 value={nivelFilter}
-                                onChange={(e) => handleFilterChange(setNivelFilter)(e.target.value)}
+                                onChange={(e) => handleFilterChangeWithTracking(setNivelFilter, "nivel")(e.target.value)}
                                 className="font-sans text-[13px] font-medium px-3 py-1.5 border-2 border-black rounded-full bg-black text-yellow cursor-pointer outline-none focus:border-yellow transition-colors"
                             >
                                 <option value="Todos">Todos los niveles</option>
@@ -299,7 +309,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
                             {/* Modalidad */}
                             <select
                                 value={modalidadFilter}
-                                onChange={(e) => handleFilterChange(setModalidadFilter)(e.target.value)}
+                                onChange={(e) => handleFilterChangeWithTracking(setModalidadFilter, "modalidad")(e.target.value)}
                                 className="font-sans text-[13px] font-medium px-3 py-1.5 border-2 border-black rounded-full bg-black text-yellow cursor-pointer outline-none focus:border-yellow transition-colors"
                             >
                                 <option value="Todos">Todas las modalidades</option>
@@ -311,7 +321,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
                             {/* Universidad (nuevo) */}
                             <select
                                 value={universidadFilter}
-                                onChange={(e) => handleFilterChange(setUniversidadFilter)(e.target.value)}
+                                onChange={(e) => handleFilterChangeWithTracking(setUniversidadFilter, "universidad")(e.target.value)}
                                 className="font-sans text-[13px] font-medium px-3 py-1.5 border-2 border-black rounded-full bg-black text-yellow cursor-pointer outline-none focus:border-yellow transition-colors"
                             >
                                 <option value="Todos">Todas las universidades</option>

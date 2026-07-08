@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { submitLead } from "@/app/actions/leads";
+import { trackEvent } from "@/lib/tracking";
 
 const PAISES_LATAM = [
     "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica",
@@ -41,6 +42,7 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
         if (!yaRegistrado) {
             setVisible(true);
             onVisibilidadChange?.(true);
+            trackEvent("leadwall_view");
         }
     }, []);
 
@@ -80,6 +82,10 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
                 localStorage.setItem("ctl_lead_email", correo.trim());
                 setVisible(false);
                 onVisibilidadChange?.(false);
+                trackEvent("leadwall_submit", {
+                    nivel_interes: nivelInteres ?? "no_especificado",
+                    area_interes: areaInteres ?? "no_especificado",
+                });
             } else {
                 setError(result.message ?? "Error inesperado.");
             }

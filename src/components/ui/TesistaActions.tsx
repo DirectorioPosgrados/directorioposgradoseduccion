@@ -8,6 +8,7 @@
 import { useState } from "react";
 import type { Programa } from "@/types";
 import type { Tarifas } from "@/lib/services/supabase";
+import { trackEvent } from "@/lib/tracking";
 
 /** Formatea un valor numérico como USD */
 function fmtUSD(valor: number): string {
@@ -50,7 +51,15 @@ export function TesistaActions({ programa, variant = "card", tarifas }: TesistaA
                         Calcula aquí el costo de tu inversión
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" checked={incluirTesis} onChange={(e) => setIncluirTesis(e.target.checked)} className="peer sr-only" />
+                        <input type="checkbox" checked={incluirTesis} onChange={(e) => {
+                            setIncluirTesis(e.target.checked);
+                            if (e.target.checked) {
+                                trackEvent("calculadora_uso", {
+                                    programa: programa.nombre,
+                                    universidad: programa.universidad,
+                                });
+                            }
+                        }} className="peer sr-only" />
                         <span className={`w-4 h-4 border-2 rounded-[3px] flex items-center justify-center transition-colors peer-checked:bg-yellow peer-checked:border-yellow peer-focus:outline-none ${esDetalle ? "border-white/40" : "border-gray-400"}`}>
                             {incluirTesis && (
                                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
