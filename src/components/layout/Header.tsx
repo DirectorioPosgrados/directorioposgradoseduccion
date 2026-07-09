@@ -38,7 +38,7 @@ export function Header({ ocultarNavegacion = false }: HeaderProps) {
             href="#catalogo"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+              document.getElementById("catalogo-grid-anchor")?.scrollIntoView({ behavior: "smooth" });
               setMenuOpen(false);
             }}
             className="font-sans font-medium text-[15px] tracking-[-0.2px] no-underline text-yellow px-3.5 py-2 rounded-sm transition-colors hover:bg-yellow hover:text-black leading-tight"

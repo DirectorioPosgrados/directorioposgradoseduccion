@@ -41,6 +41,16 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
     const iaVencida = estaVencidaPruebaIA();
     const [leadModalVisible, setLeadModalVisible] = useState(false);
 
+    function scrollToGridSiNoVisible() {
+        const anchor = document.getElementById("catalogo-grid-anchor");
+        if (!anchor) return;
+        const rect = anchor.getBoundingClientRect();
+        const visible = rect.top >= 0 && rect.top <= window.innerHeight;
+        if (!visible) {
+            anchor.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
     // ── Estados de filtro ──
     const [activeFilter, setActiveFilter] = useState("Todos");       // País
     const [nivelFilter, setNivelFilter] = useState("Todos");         // Nivel
@@ -199,6 +209,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
         setter(val);
         setVisibleCount(PAGE_SIZE);
         trackEvent("filtro_uso", { tipo, valor: val });
+        scrollToGridSiNoVisible();
     };
 
     const handlePriceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -207,6 +218,12 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
         setVisibleCount(PAGE_SIZE);
         const rango = PRICE_RANGES[index]?.label ?? "Todos";
         trackEvent("filtro_uso", { tipo: "precio", valor: rango });
+        scrollToGridSiNoVisible();
+    };
+
+    const handleSearchSubmit = () => {
+        scrollToGridSiNoVisible();
+        trackEvent("busqueda_texto", { termino: searchTerm });
     };
 
     // ── Números visibles para el contador ──
@@ -246,7 +263,7 @@ export default function CatalogoClient({ inicialProgramas, serverError, tarifas 
         <>
             <LeadModal onVisibilidadChange={setLeadModalVisible} />
             <Header ocultarNavegacion={leadModalVisible} />
-            <Hero onSearch={handleSearch} />
+            <Hero onSearch={handleSearch} onSearchSubmit={handleSearchSubmit} />
             <PresentacionInvestigacion />
             <StatsBarDynamic programas={inicialProgramas} />
 

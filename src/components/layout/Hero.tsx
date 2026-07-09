@@ -6,9 +6,10 @@ import { BannerRotativo } from "@/components/ui/BannerRotativo";
 
 interface HeroProps {
   onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchSubmit?: () => void;
 }
 
-export function Hero({ onSearch }: HeroProps) {
+export function Hero({ onSearch, onSearchSubmit }: HeroProps) {
   return (
     <section className="bg-black text-white px-10 py-16 max-sm:px-5 max-sm:py-12 relative overflow-hidden">
       {/* Círculo decorativo de fondo */}
@@ -41,10 +42,17 @@ export function Hero({ onSearch }: HeroProps) {
                 placeholder="Busca por programa o país... ej: MBA, Colombia"
                 autoComplete="off"
                 onChange={onSearch}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    onSearchSubmit?.();
+                  }
+                }}
                 className="flex-1 font-sans text-[15px] font-medium px-5 py-3.5 border-2 border-white/20 border-r-0 rounded-l-md bg-white/6 text-white outline-none transition-colors placeholder:text-white/40 focus:border-yellow focus:bg-white/10"
               />
               <button
                 type="button"
+                onClick={() => onSearchSubmit?.()}
                 className="font-sans text-sm font-bold tracking-[0.5px] uppercase bg-yellow text-black border-2 border-yellow rounded-r-md px-6 py-3.5 cursor-pointer transition-colors hover:bg-yellow-dark hover:border-yellow-dark"
               >
                 Buscar

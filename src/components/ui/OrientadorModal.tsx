@@ -8,6 +8,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { orientarUsuarioConIA, type PerfilOrientador, type RespuestaOrientador } from "@/app/actions/orientador";
+import { trackEvent } from "@/lib/tracking";
 
 const PAISES = [
     "Sin preferencia", "México", "Colombia", "Venezuela", "Perú", "Ecuador", "Chile",
@@ -72,6 +73,7 @@ export function OrientadorModal({ abierto, onCerrar }: Props) {
             };
             const res = await orientarUsuarioConIA(perfil);
             setResultado(res);
+            trackEvent("orientador_uso", { area, objetivo, modalidad });
         } catch (err) {
             setError(
                 err instanceof Error ? err.message : "Error inesperado al consultar el orientador."

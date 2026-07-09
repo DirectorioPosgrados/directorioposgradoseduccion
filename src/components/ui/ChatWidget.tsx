@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { consultarExperto } from "@/app/actions/chatConsultor";
+import { trackEvent } from "@/lib/tracking";
 import type { MensajeChat, ContextoPrograma, ContextoOrientador } from "@/app/actions/chatConsultor";
 import type { Programa } from "@/types";
 
@@ -196,11 +197,13 @@ export default function ChatWidget({ variant, programa }: ChatWidgetProps) {
         if (cycleTimerRef.current) clearTimeout(cycleTimerRef.current);
         setShowBubble(false);
         setWidgetState("open");
+        trackEvent("consultor_experto_abierto", { programa: programaRef.current?.nombre ?? "desconocido" });
     }, []);
 
     const handleMinimizedClick = useCallback(() => {
         if (variantRef.current === "detalle") {
             setWidgetState("open");
+            trackEvent("consultor_experto_abierto", { programa: programaRef.current?.nombre ?? "desconocido" });
         } else {
             // catalogo: mostrar toast
             setShowToast(true);
