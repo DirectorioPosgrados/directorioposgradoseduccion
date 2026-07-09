@@ -4,6 +4,7 @@
 // Incluye análisis de mercado del país desde el repositorio local del Word del cliente.
 
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { fetchProgramas, fetchTarifas, type Tarifas } from "@/lib/services/supabase";
 import { obtenerAnalisisPorPais } from "@/lib/constants/paisesData";
 import { estaVencidaPruebaIA } from "@/config/iaTrial";
@@ -29,6 +30,25 @@ export async function generateStaticParams() {
         // Si Airtable falla en build, no se generan rutas estáticas.
         // Las páginas se renderizarán on-demand (ISR fallback).
         return [];
+    }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
+
+    try {
+        const programas = await fetchProgramas();
+        const programa = programas.find((p) => p.slug === slug);
+
+        if (!programa) {
+            return { title: "Programa no encontrado | Directorio de Posgrados" };
+        }
+
+        return {
+            title: `${programa.nombre} — ${programa.universidad}`,
+        };
+    } catch {
+        return { title: "Directorio de Posgrados" };
     }
 }
 
