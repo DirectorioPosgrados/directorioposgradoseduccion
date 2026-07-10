@@ -1,7 +1,7 @@
 // Archivo: src/lib/tracking.ts
 // Utilidad centralizada para disparar eventos personalizados hacia el dataLayer de GTM.
-// Si GTM no está instalado (variable de entorno vacía), esto no falla — dataLayer
-// simplemente no existe y el push se ignora de forma segura.
+// El dataLayer se inicializa como array vacío si aún no existe, para que los eventos
+// disparados antes de que GTM termine de cargar queden en cola y no se pierdan.
 
 declare global {
     interface Window {
@@ -11,8 +11,8 @@ declare global {
 
 export function trackEvent(nombre: string, datos: Record<string, unknown> = {}): void {
     if (typeof window === "undefined") return; // nunca correr en el servidor
-    if (!window.dataLayer) return; // GTM no instalado, no hacer nada
 
+    window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
         event: nombre,
         ...datos,
