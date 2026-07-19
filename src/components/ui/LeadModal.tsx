@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { submitLead } from "@/app/actions/leads";
-import { trackEvent } from "@/lib/tracking";
+import { trackEvent, activarClarity, activarMetaPixel } from "@/lib/tracking";
+
+declare global {
+    interface Window {
+        gtag?: (...args: unknown[]) => void;
+    }
+}
 
 const PAISES_LATAM = [
     "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica",
@@ -36,6 +42,7 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
     const [areaInteres, setAreaInteres] = useState<string | null>(null);
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [aceptaCookies, setAceptaCookies] = useState(false);
 
     useEffect(() => {
         const yaRegistrado = localStorage.getItem("ctl_lead_email");
@@ -66,6 +73,20 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
 
         setEnviando(true);
         setError(null);
+
+        if (aceptaCookies) {
+            localStorage.setItem("ctl_cookie_consent", "granted");
+            window.gtag?.("consent", "update", {
+                analytics_storage: "granted",
+                ad_storage: "granted",
+                ad_user_data: "granted",
+                ad_personalization: "granted",
+            });
+            activarClarity();
+            activarMetaPixel();
+        } else {
+            localStorage.setItem("ctl_cookie_consent", "denied");
+        }
 
         try {
             const result = await submitLead({
@@ -196,6 +217,27 @@ export default function LeadModal({ onVisibilidadChange }: LeadModalProps) {
                             ))}
                         </div>
                     </div>
+
+                    <label className="flex items-start gap-2 cursor-pointer select-none mb-3">
+                        <input
+                            type="checkbox"
+                            checked={aceptaCookies}
+                            onChange={(e) => setAceptaCookies(e.target.checked)}
+                            className="mt-0.5"
+                        />
+                        <span className="text-xs text-white/60 leading-relaxed">
+                            Acepto el uso de cookies analíticas para mejorar mi experiencia (ver{" "}
+                            <a
+                                href="/politicas-de-privacidad"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-yellow underline"
+                            >
+                                Política de Privacidad
+                            </a>
+                            ).
+                        </span>
+                    </label>
 
                     {error && (
                         <p className="text-red-400 text-xs mt-1 mb-2">{error}</p>
